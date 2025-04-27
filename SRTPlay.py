@@ -81,8 +81,9 @@ def srt_to_blocks(subs: List[pysrt.SubRipItem], words_per_img: int):
 def gemini_image(client, context_blocks: List[str], text: str) -> bytes:
     """
     Gera 1 imagem via Gemini Flash Experimental e retorna os bytes.
+    Usa o método generate_images do SDK google-genai.
     """
-    # monta contexto para continuidade
+    # Monta o prompt com contexto
     ctx = "\n\n".join(context_blocks)
     prompt = (
         f"Previous scenes for continuity:\n{ctx}\n\n"
@@ -91,7 +92,7 @@ def gemini_image(client, context_blocks: List[str], text: str) -> bytes:
         f"Style: {STYLE_BLOCK}"
     )
 
-    # usa generate_images em vez de generate_content
+    # Chamada CORRETA para gerar imagem
     images_response = client.models.generate_images(
         model="gemini-2.0-flash-exp-image-generation",
         prompt=prompt,
@@ -99,8 +100,9 @@ def gemini_image(client, context_blocks: List[str], text: str) -> bytes:
         aspect_ratio="16:9"
     )
 
-    # extrai os bytes da primeira imagem
+    # Retorna os bytes da imagem
     return images_response.generated_images[0].image.image_bytes
+
 
 
 # ───────────────────────────────────────────
