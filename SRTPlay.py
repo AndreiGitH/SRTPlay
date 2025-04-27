@@ -142,6 +142,10 @@ st.title("🎞️  SRT → Gemini Flash → Zoom Clips")
 with st.sidebar:
     st.header("Configurações")
     api_key = st.secrets["GEMINI_API_KEY"]  # Obtém a chave segura do Streamlit Secrets, type="password")
+
+    # 2️⃣ Configura o SDK (v1alpha) ANTES de criar o client
+    genai.configure(api_key=api_key, api_version="v1alpha")
+    client = genai.Client()
     words_per_img = st.number_input("Palavras por imagem", 5, 50, 20)
     context_segments = st.slider("Blocos de contexto", 0, 5, 3)
     fps = st.number_input("FPS", 15, 60, 30)
