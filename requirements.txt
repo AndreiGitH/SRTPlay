@@ -1,4 +1,4 @@
 streamlit>=1.32
-google-generativeai>=0.4
-pysrt>=1.1
-tqdm>=4.66
+google-generativeai>=0.4.0
+pysrt>=1.1.2
+tqdm>=4.66.1
