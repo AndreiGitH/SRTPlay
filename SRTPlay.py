@@ -35,6 +35,9 @@ from tqdm import tqdm
 from google import genai
 from google.genai import types
 
+from io import BytesIO
+from PIL import Image  # já deve estar no seu requirements
+
 # ───────────────────────────────────────────
 STYLE_BLOCK = (
     "Ultra-realistic, cinematic lighting, volumetric light, "
@@ -80,10 +83,10 @@ def srt_to_blocks(subs: List[pysrt.SubRipItem], words_per_img: int):
 
 def gemini_image(client, context_blocks: List[str], text: str) -> bytes:
     """
-    Gera 1 imagem via Gemini Flash Experimental e retorna os bytes.
-    Usa o método generate_images do SDK google-genai.
+    Gera 1 imagem via Gemini Flash Experimental e retorna bytes PNG.
+    Usa client.models.generate_images com GenerateImagesConfig.
     """
-    # Monta o prompt com contexto
+    # monta o prompt com contexto
     ctx = "\n\n".join(context_blocks)
     prompt = (
         f"Previous scenes for continuity:\n{ctx}\n\n"
@@ -92,16 +95,21 @@ def gemini_image(client, context_blocks: List[str], text: str) -> bytes:
         f"Style: {STYLE_BLOCK}"
     )
 
-    # Chamada CORRETA para gerar imagem
-    images_response = client.models.generate_images(
+    # chamada correta ao endpoint de imagem
+    resp = client.models.generate_images(
         model="gemini-2.0-flash-exp-image-generation",
         prompt=prompt,
-        num_images=1,
-        aspect_ratio="16:9"
+        config=types.GenerateImagesConfig(
+            number_of_images=1,
+            output_mime_type="image/png"
+        )
     )
 
-    # Retorna os bytes da imagem
-    return images_response.generated_images[0].image.image_bytes
+    # resp.generated_images[0].image é um PIL.Image; converte para bytes PNG
+    pil_img: Image.Image = resp.generated_images[0].image
+    buf = BytesIO()
+    pil_img.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 
