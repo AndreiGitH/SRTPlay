@@ -75,25 +75,33 @@ def srt_to_blocks(subs: List[pysrt.SubRipItem], words_per_img: int):
     return blocks
 
 # ───────────────────────────────────────────
-# Gemini geração de imagem inline
+# Gemini geração de imagem inline (ajustada)
 # ───────────────────────────────────────────
 
-def gemini_image(client, context_blocks: List[str], text: str):
+def gemini_image(client, context_blocks: List[str], text: str) -> bytes:
+    """
+    Gera 1 imagem via Gemini Flash Experimental e retorna os bytes.
+    """
+    # monta contexto para continuidade
     ctx = "\n\n".join(context_blocks)
     prompt = (
         f"Previous scenes for continuity:\n{ctx}\n\n"
         f"Current scene:\n{text}\n\n"
-        f"Generate ONE 16:9 IMAGE capturing ONLY the current scene. Style: {STYLE_BLOCK}"
+        f"Generate ONE 16:9 IMAGE capturing ONLY the current scene. "
+        f"Style: {STYLE_BLOCK}"
     )
-    resp = client.models.generate_content(
+
+    # usa generate_images em vez de generate_content
+    images_response = client.models.generate_images(
         model="gemini-2.0-flash-exp-image-generation",
-        contents=prompt,
-        config=types.GenerateContentConfig(response_modalities=["IMAGE"]),
+        prompt=prompt,
+        num_images=1,
+        aspect_ratio="16:9"
     )
-    for part in resp.candidates[0].content.parts:
-        if part.inline_data:
-            return part.inline_data.data  # bytes
-    raise RuntimeError("Gemini não retornou imagem.")
+
+    # extrai os bytes da primeira imagem
+    return images_response.generated_images[0].image.image_bytes
+
 
 # ───────────────────────────────────────────
 # FFmpeg util
