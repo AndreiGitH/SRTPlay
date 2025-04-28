@@ -1,5 +1,5 @@
-google-generativeai>=0.4.0  # Ou a versão mais recente disponível
-google-genai
-streamlit
-Pillow
-python-dotenv
+streamlit>=1.32
+google-genai>=0.8.5
+pysrt>=1.1.2
+tqdm>=4.66.1
+pillow>=9.0.0
