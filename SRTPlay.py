@@ -1,22 +1,27 @@
 import streamlit as st
 import google.genai as genai
+from google.genai import types
 from PIL import Image
 from io import BytesIO
 
-# Carrega a chave de API do Streamlit Secrets
+# Carrega API Key
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
-    st.error(
-        "A chave de API do Google Gemini não foi encontrada nos Streamlit Secrets. "
-        "Certifique-se de configurá-la na seção 'Secrets' do seu aplicativo Streamlit."
-    )
+    st.error("Chave de API não encontrada.")
     st.stop()
+
+# Cria o client corretamente
+client = genai.GenerativeServiceClient(
+    api_key=GEMINI_API_KEY,
+    transport="rest",
+    http_options=types.HttpOptions(api_version="v1alpha"),
+)
 
 st.title("Geração de Imagem com Gemini API")
 
 prompt = st.text_area(
-    "Digite um prompt para gerar a imagem:",
+    "Digite o prompt para gerar a imagem:",
     value="A pig with wings and a top hat flying over a happy futuristic scifi city with lots of greenery.",
 )
 
@@ -24,11 +29,9 @@ if st.button("Gerar Imagem"):
     if prompt:
         with st.spinner("Gerando imagem..."):
             try:
-                # Chamada direta com API KEY
-                response = genai.generate_content(
-                    model="gemini-1.5-flash",  # ou outro modelo disponível
+                response = client.generate_content(
+                    model="models/gemini-1.5-flash",
                     prompt=prompt,
-                    api_key=GEMINI_API_KEY,
                     generation_config={"response_mime_type": "image/png"},
                 )
 
@@ -41,21 +44,13 @@ if st.button("Gerar Imagem"):
                             st.info("Texto gerado:")
                             st.write(part.text)
                 else:
-                    st.warning("A resposta não continha partes válidas. Verifique o prompt e a resposta da API.")
+                    st.warning("Resposta vazia.")
                     st.write(response)
 
             except Exception as e:
                 st.error(f"Ocorreu um erro: {e}")
     else:
-        st.warning("Por favor, digite um prompt.")
+        st.warning("Digite um prompt!")
 
 st.sidebar.header("Configurações")
-st.sidebar.markdown(
-    "Este aplicativo usa a API Gemini para gerar imagens a partir de prompts de texto."
-)
-st.sidebar.markdown(
-    "Certifique-se de ter configurado sua chave de API do Google Cloud na seção 'Secrets' do seu aplicativo Streamlit."
-)
-st.sidebar.markdown(
-    "Para mais informações, consulte a [documentação da API Gemini](https://ai.google.dev/docs)."
-)
+st.sidebar.markdown("Usa a nova API Gemini via google-genai.")
