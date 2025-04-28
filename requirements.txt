@@ -1,5 +1,5 @@
 streamlit>=1.32
-google-generativeai>=0.3.2   # SDK com genai.configure e modelo flash-exp
+google-generativeai>=0.3.2
 pysrt>=1.1.2
 tqdm>=4.66.1
-pillow>=9.0.0                # exibir/salvar PNGs no Streamlit
+pillow>=9.0.0
