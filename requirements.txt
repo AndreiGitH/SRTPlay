@@ -1,4 +1,5 @@
 google-generativeai>=0.4.0  # Ou a versão mais recente disponível
+google-genai
 streamlit
 Pillow
 python-dotenv
