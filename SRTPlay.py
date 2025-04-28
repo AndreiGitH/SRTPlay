@@ -49,17 +49,31 @@ def agrupar_blocos(subs: List[pysrt.SubRipItem], min_w=20, max_w=30):
 
 # —— Gemini helpers ————————————————————
 def gerar_prompt(client_txt, texto: str) -> str:
+    """
+    Pede ao modelo um prompt cinematográfico em inglês.
+    Se o modelo não devolver content.parts, retorna fallback.
+    """
     pedido = (
         "Create a concise, vivid, ultra-realistic image-generation prompt that represents "
         "this biblical scene:\n\n"
         f"{texto}\n\n"
         f"End the prompt with these quality parameters:\n{STYLE_SUFFIX}"
     )
-    resp = client_txt.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=pedido
-    )
-    return resp.candidates[0].content.parts[0].text.strip()
+
+    try:
+        resp = client_txt.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=pedido
+        )
+        parts = resp.candidates[0].content.parts if resp.candidates else None
+        if parts:
+            return parts[0].text.strip()
+    except Exception as exc:
+        st.warning(f"⚠️  Falha ao criar prompt: {exc}")
+
+    # Fallback: devolve o próprio texto + estilo
+    return f"{texto}, {STYLE_SUFFIX}"
+
 
 def gerar_imagem(client_img, prompt: str, tentativas: int = 3) -> bytes | None:
     """
