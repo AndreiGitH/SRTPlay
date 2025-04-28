@@ -1,6 +1,5 @@
 import streamlit as st
-from google import genai
-from google.genai import types
+import google.genai as genai
 from PIL import Image
 from io import BytesIO
 
@@ -14,12 +13,6 @@ if not GEMINI_API_KEY:
     )
     st.stop()
 
-# Configura a API
-genai.configure(api_key=GEMINI_API_KEY)
-
-# Instancia o cliente
-client = genai.Client()
-
 st.title("Geração de Imagem com Gemini API")
 
 prompt = st.text_area(
@@ -31,22 +24,22 @@ if st.button("Gerar Imagem"):
     if prompt:
         with st.spinner("Gerando imagem..."):
             try:
-                response = client.models.generate_content(
-                    model="gemini-2.0-flash-exp-image-generation",
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        response_modalities=["TEXT", "IMAGE"]
-                    )
+                # Chamada direta com API KEY
+                response = genai.generate_content(
+                    model="gemini-1.5-flash",  # ou outro modelo disponível
+                    prompt=prompt,
+                    api_key=GEMINI_API_KEY,
+                    generation_config={"response_mime_type": "image/png"},
                 )
 
                 if response.candidates and response.candidates[0].content.parts:
                     for part in response.candidates[0].content.parts:
-                        if part.text is not None:
-                            st.info("Texto gerado:")
-                            st.write(part.text)
-                        elif part.inline_data is not None:
+                        if part.inline_data is not None:
                             image = Image.open(BytesIO(part.inline_data.data))
                             st.image(image, caption=prompt, use_column_width=True)
+                        elif part.text is not None:
+                            st.info("Texto gerado:")
+                            st.write(part.text)
                 else:
                     st.warning("A resposta não continha partes válidas. Verifique o prompt e a resposta da API.")
                     st.write(response)
