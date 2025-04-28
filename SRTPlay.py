@@ -8,8 +8,6 @@ import streamlit as st
 import pysrt
 import google.genai as genai
 from google.genai import types
-
-# Para exibir e manipular imagens em memória
 from PIL import Image
 from io import BytesIO
 
@@ -23,7 +21,7 @@ STYLE_SUFFIX = (
 
 # —— session state init ——
 if "imgs" not in st.session_state:
-    st.session_state["imgs"] = []
+    st.session_state["imgs"] = []  # lista de dicts {"name","bytes","prompt"}
 
 # —— helpers de tempo ——
 def tag(t: pysrt.SubRipTime) -> str:
@@ -66,7 +64,6 @@ def gerar_prompt(client_txt, texto: str) -> str:
             model="gemini-2.0-flash",
             contents=pedido
         )
-        # guarda em variável para evitar repetições
         if resp and resp.candidates:
             cand0 = resp.candidates[0]
             if cand0.content and getattr(cand0.content, "parts", None):
@@ -78,9 +75,9 @@ def gerar_prompt(client_txt, texto: str) -> str:
     # fallback
     return f"{texto}, {STYLE_SUFFIX}"
 
-# —— gerar imagem com guard completo ——
-def gerar_imagem(client_img, prompt: str, tries: int = 7) -> bytes | None:
-    for attempt in range(tries):
+# —— gerar imagem com retentativas ——
+def gerar_imagem(client_img, prompt: str, tries: int = 3) -> bytes | None:
+    for _ in range(tries):
         try:
             resp = client_img.models.generate_content(
                 model="gemini-2.0-flash-exp-image-generation",
@@ -109,7 +106,7 @@ if not api_key:
     st.error("Configure GEMINI_API_KEY em Settings ▸ Secrets.")
     st.stop()
 
-client_txt = genai.Client(api_key=api_key)  # para texto (v1beta)
+client_txt = genai.Client(api_key=api_key)
 client_img = genai.Client(
     api_key=api_key,
     http_options=types.HttpOptions(api_version="v1alpha")
@@ -121,7 +118,7 @@ max_w = st.sidebar.number_input("Máx. palavras/bloco", 20, 60, 30)
 uploaded = st.file_uploader("📂 Faça upload do .srt", type="srt")
 
 if st.button("🚀 Gerar Imagens"):
-    # limpa gerações anteriores
+    # limpa estado anterior
     st.session_state["imgs"] = []
 
     if not uploaded:
@@ -136,22 +133,28 @@ if st.button("🚀 Gerar Imagens"):
     out_dir = Path("output_images"); out_dir.mkdir(exist_ok=True)
 
     for i, blk in enumerate(blocos, 1):
-        prompt = gerar_prompt(client_txt, blk["text"])
+        prompt    = gerar_prompt(client_txt, blk["text"])
         img_bytes = gerar_imagem(client_img, prompt)
 
         if img_bytes is None:
-            st.warning(f"⚠️ Bloco {i}: sem imagem após tentativas, pulado.")
+            st.warning(f"⚠️ Bloco {i}: nenhuma imagem retornada, pulado.")
             prog.progress(i / len(blocos))
             continue
 
         fname = f"{tag(blk['start'])}-{tag(blk['end'])}.png"
         (out_dir / fname).write_bytes(img_bytes)
-        st.session_state["imgs"].append({"name": fname, "bytes": img_bytes})
+
+        # guarda nome, bytes e prompt
+        st.session_state["imgs"].append({
+            "name":   fname,
+            "bytes":  img_bytes,
+            "prompt": prompt
+        })
         prog.progress(i / len(blocos))
 
     st.success("✔️ Processamento concluído! Veja a galeria abaixo.")
 
-# — galeria persistente —
+# —— galeria persistente + downloads ——
 if st.session_state["imgs"]:
     st.header("📸 Imagens Geradas")
     for idx, item in enumerate(st.session_state["imgs"]):
@@ -176,4 +179,17 @@ if st.session_state["imgs"]:
         file_name="todas_as_imagens.zip",
         mime="application/zip",
         key="zip-all"
+    )
+
+    # botão de download de prompts
+    prompts_txt = "\n\n".join(
+        f"{item['name']}: {item['prompt']}"
+        for item in st.session_state["imgs"]
+    )
+    st.download_button(
+        "⬇️ Baixar todos os prompts (.txt)",
+        data=prompts_txt,
+        file_name="prompts.txt",
+        mime="text/plain",
+        key="dl-prompts"
     )
