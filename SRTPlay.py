@@ -8,6 +8,8 @@ import streamlit as st
 import pysrt
 import google.genai as genai
 from google.genai import types
+
+# Para exibir e manipular imagens em memória
 from PIL import Image
 from io import BytesIO
 
@@ -21,7 +23,7 @@ STYLE_SUFFIX = (
 
 # —— session state init ——
 if "imgs" not in st.session_state:
-    st.session_state["imgs"] = []  # armazena dicts {"name","bytes"}
+    st.session_state["imgs"] = []
 
 # —— helpers de tempo ——
 def tag(t: pysrt.SubRipTime) -> str:
@@ -53,7 +55,7 @@ def agrupar_blocos(subs: List[pysrt.SubRipItem], min_w=20, max_w=30):
 # —— gerar prompt cinematográfico ——
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
-        "Create a concise, vivid, image generation prompt that represents "
+        "Create a concise, vivid, ultra-realistic image generation prompt that represents "
         "this biblical scene. The prompt must end with the quality parameters and explicitly "
         "keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
@@ -64,17 +66,21 @@ def gerar_prompt(client_txt, texto: str) -> str:
             model="gemini-2.0-flash",
             contents=pedido
         )
-        cand = resp.candidates
-        if cand and cand[0].content.parts:
-            return cand[0].content.parts[0].text.strip()
+        # guarda em variável para evitar repetições
+        if resp and resp.candidates:
+            cand0 = resp.candidates[0]
+            if cand0.content and getattr(cand0.content, "parts", None):
+                text = cand0.content.parts[0].text
+                if text:
+                    return text.strip()
     except Exception:
         pass
     # fallback
     return f"{texto}, {STYLE_SUFFIX}"
 
-# —— gerar imagem com retentativas ——
-def gerar_imagem(client_img, prompt: str, tries: int = 6) -> bytes | None:
-    for _ in range(tries):
+# —— gerar imagem com guard completo ——
+def gerar_imagem(client_img, prompt: str, tries: int = 3) -> bytes | None:
+    for attempt in range(tries):
         try:
             resp = client_img.models.generate_content(
                 model="gemini-2.0-flash-exp-image-generation",
@@ -85,11 +91,12 @@ def gerar_imagem(client_img, prompt: str, tries: int = 6) -> bytes | None:
             time.sleep(1.0)
             continue
 
-        cand = resp.candidates
-        if cand and cand[0].content.parts:
-            for part in cand[0].content.parts:
-                if part.inline_data:
-                    return part.inline_data.data
+        if resp and resp.candidates:
+            cand0 = resp.candidates[0]
+            if cand0.content and getattr(cand0.content, "parts", None):
+                for part in cand0.content.parts:
+                    if part.inline_data:
+                        return part.inline_data.data
         time.sleep(1.2)
     return None
 
@@ -102,7 +109,7 @@ if not api_key:
     st.error("Configure GEMINI_API_KEY em Settings ▸ Secrets.")
     st.stop()
 
-client_txt = genai.Client(api_key=api_key)
+client_txt = genai.Client(api_key=api_key)  # para texto (v1beta)
 client_img = genai.Client(
     api_key=api_key,
     http_options=types.HttpOptions(api_version="v1alpha")
@@ -114,7 +121,7 @@ max_w = st.sidebar.number_input("Máx. palavras/bloco", 20, 60, 30)
 uploaded = st.file_uploader("📂 Faça upload do .srt", type="srt")
 
 if st.button("🚀 Gerar Imagens"):
-    # -> limpa estado antigo para evitar duplicação de keys
+    # limpa gerações anteriores
     st.session_state["imgs"] = []
 
     if not uploaded:
@@ -133,14 +140,12 @@ if st.button("🚀 Gerar Imagens"):
         img_bytes = gerar_imagem(client_img, prompt)
 
         if img_bytes is None:
-            st.warning(f"⚠️ Bloco {i}: sem imagem, pulado.")
+            st.warning(f"⚠️ Bloco {i}: sem imagem após {tries} tentativas, pulado.")
             prog.progress(i / len(blocos))
             continue
 
         fname = f"{tag(blk['start'])}-{tag(blk['end'])}.png"
         (out_dir / fname).write_bytes(img_bytes)
-
-        # guarda em session_state
         st.session_state["imgs"].append({"name": fname, "bytes": img_bytes})
         prog.progress(i / len(blocos))
 
@@ -151,7 +156,6 @@ if st.session_state["imgs"]:
     st.header("📸 Imagens Geradas")
     for idx, item in enumerate(st.session_state["imgs"]):
         st.image(item["bytes"], caption=item["name"], use_column_width=True)
-        # key única combina índice + nome
         st.download_button(
             label=f"Baixar {item['name']}",
             data=item["bytes"],
@@ -160,16 +164,15 @@ if st.session_state["imgs"]:
             key=f"dl-{idx}-{item['name']}"
         )
 
-    # ZIP on-the-fly
-    zbuf = io.BytesIO()
-    with zipfile.ZipFile(zbuf, "w", zipfile.ZIP_DEFLATED) as zf:
+    # botão ZIP
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for item in st.session_state["imgs"]:
             zf.writestr(item["name"], item["bytes"])
-    zbuf.seek(0)
-
+    buf.seek(0)
     st.download_button(
         "⬇️ Baixar todas as imagens (.zip)",
-        data=zbuf,
+        data=buf,
         file_name="todas_as_imagens.zip",
         mime="application/zip",
         key="zip-all"
