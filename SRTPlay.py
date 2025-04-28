@@ -13,8 +13,9 @@ from io import BytesIO
 
 # —— estilo turbinado ——
 STYLE_SUFFIX = (
-    "pixar image,"
-    "biblical times, "
+    "Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
+    "film still, epic composition, highly detailed, 4K HDR, masterpiece, "
+    "shallow depth-of-field, 35 mm lens, photorealistic, biblical times, "
     "ancient Middle-East setting, 16:9 aspect ratio, no text."
 )
 
@@ -72,7 +73,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     return f"{texto}, {STYLE_SUFFIX}"
 
 # —— gerar imagem com retentativas ——
-def gerar_imagem(client_img, prompt: str, tries: int = 3) -> bytes | None:
+def gerar_imagem(client_img, prompt: str, tries: int = 6) -> bytes | None:
     for _ in range(tries):
         try:
             resp = client_img.models.generate_content(
