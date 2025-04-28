@@ -53,7 +53,7 @@ def agrupar_blocos(subs: List[pysrt.SubRipItem], min_w=20, max_w=30):
 # —— gerar prompt cinematográfico ——
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
-        "Create a concise, vivid, ultra-realistic image generation prompt that represents "
+        "Create a concise, vivid, image generation prompt that represents "
         "this biblical scene. The prompt must end with the quality parameters and explicitly "
         "keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
