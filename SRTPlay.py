@@ -28,14 +28,14 @@ prompt = st.text_area(
 
 if st.button("Gerar Imagem"):
  if prompt:
- with st.spinner("Gerando imagem..."):
- try:
- model = genai.GenerativeModel(
- model_name="gemini-2.0-flash-exp-image-generation"
- )
- response = model.generate_content(
- contents=prompt
- )
+  with st.spinner("Gerando imagem..."):
+   try:
+    model = genai.GenerativeModel(
+     model_name="gemini-2.0-flash-exp-image-generation"
+    )
+    response = model.generate_content(
+     contents=prompt
+    )
  if response.parts:
  for part in response.parts:
  if hasattr(part, "data"):
