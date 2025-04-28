@@ -13,9 +13,9 @@ from io import BytesIO
 
 # —— estilo turbinado ——
 STYLE_SUFFIX = (
-    "Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
-    "film still, epic composition, highly detailed, 4K HDR, masterpiece, "
-    "shallow depth-of-field, 35 mm lens, photorealistic, biblical times, "
+    "3d rendered image,"
+    " highly detailed, 4K HDR, masterpiece, "
+    "biblical times, "
     "ancient Middle-East setting, 16:9 aspect ratio, no text."
 )
 
