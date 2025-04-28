@@ -97,7 +97,7 @@ with st.sidebar:
     api_key = st.secrets["GEMINI_API_KEY"]
 
     # Configura o SDK **v1alpha** (necessário p/ modelo experimental)
-    genai.configure(api_key=api_key)
+    
     client = genai.Client()
 
     words_per_img    = st.number_input("Palavras por imagem", 5, 50, 20)
