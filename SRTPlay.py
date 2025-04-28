@@ -10,6 +10,7 @@ import google.genai as genai
 from google.genai import types
 from PIL import Image
 from io import BytesIO
+import re
 
 # —— estilo turbinado ——
 STYLE_SUFFIX = (
@@ -51,7 +52,32 @@ def agrupar_blocos(subs: List[pysrt.SubRipItem], min_w=20, max_w=30):
     return blocos
 
 # —— gerar prompt cinematográfico ——
+def clean_prompt(raw: str) -> str:
+    """
+    Limpa o texto gerado pelo Gemini, removendo cabeçalhos markdown,
+    introduções e asteriscos, retornando só o prompt puro.
+    """
+    # 1) Remove blocos “**Prompt:**” ou “Prompt:” e tudo antes
+    #    Pegamos o que vem depois da última ocorrência de “Prompt:”
+    parts = re.split(r"\*{0,2}Prompt\*{0,2}:\s*", raw)
+    body = parts[-1] if len(parts) > 1 else raw
+
+    # 2) Remove frases iniciais genéricas, por ex. "Here's a concise, vivid..."
+    body = re.sub(r"^Here(?:'|’)s a [^:]+:\s*", "", body)
+
+    # 3) Remove quaisquer asteriscos remanescentes e linhas em branco extras
+    body = body.replace("*", "").strip()
+
+    # 4) Opcional: normalize espaçamento
+    body = re.sub(r"\s+\n", "\n", body)
+    body = re.sub(r"\n\s+", "\n", body)
+
+    return body
+
 def gerar_prompt(client_txt, texto: str) -> str:
+    """
+    Pede ao Gemini um prompt cinematográfico e limpa a saída.
+    """
     pedido = (
         "Create a concise, vivid, ultra-realistic image generation prompt that represents "
         "this biblical scene. The prompt must end with the quality parameters and explicitly "
@@ -67,13 +93,14 @@ def gerar_prompt(client_txt, texto: str) -> str:
         if resp and resp.candidates:
             cand0 = resp.candidates[0]
             if cand0.content and getattr(cand0.content, "parts", None):
-                text = cand0.content.parts[0].text
-                if text:
-                    return text.strip()
+                raw = cand0.content.parts[0].text or ""
+                return clean_prompt(raw)
     except Exception:
         pass
-    # fallback
-    return f"{texto}, {STYLE_SUFFIX}"
+
+    # fallback: garantimos também limpar o fallback
+    return clean_prompt(f"{texto}, {STYLE_SUFFIX}")
+
 
 # —— gerar imagem com retentativas ——
 def gerar_imagem(client_img, prompt: str, tries: int = 10) -> bytes | None:
