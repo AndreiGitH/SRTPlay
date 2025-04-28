@@ -76,7 +76,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     return f"{texto}, {STYLE_SUFFIX}"
 
 # —— gerar imagem com retentativas ——
-def gerar_imagem(client_img, prompt: str, tries: int = 3) -> bytes | None:
+def gerar_imagem(client_img, prompt: str, tries: int = 10) -> bytes | None:
     for _ in range(tries):
         try:
             resp = client_img.models.generate_content(
