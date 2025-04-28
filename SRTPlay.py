@@ -44,6 +44,7 @@ if st.button("Gerar Imagem"):
       else:
        st.warning(
         "A resposta não continha dados de imagem. Verifique o prompt e a resposta da API."
+       )
         st.write(response)
         else:
        st.warning(
