@@ -26,7 +26,12 @@ STYLE_SUFFIX = (
     "shallow depth-of-field, 35 mm lens, photorealistic, biblical times, "
     "ancient Middle-East setting, 16:9, no text."
 )
-
+STYLE_SUFFIX = (
+    "Renaissance painting, cinematic lighting, volumetric light, dramatic contrast, "
+    "film still, epic composition, highly detailed, 4K HDR, masterpiece, "
+    "shallow depth-of-field, 35 mm lens, Renaissance painting, biblical times, "
+    "ancient Middle-East setting, 16:9, no text."
+)
 
 # —— Helpers de tempo ——
 def tag(t: pysrt.SubRipTime) -> str:
