@@ -4,18 +4,17 @@ from google.genai import types
 from PIL import Image
 from io import BytesIO
 
-# Carrega API Key
+# Carrega a chave de API do Streamlit Secrets
 GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY")
 
 if not GEMINI_API_KEY:
-    st.error("Chave de API não encontrada.")
+    st.error("A chave de API do Google Gemini não foi encontrada nos Streamlit Secrets.")
     st.stop()
 
 # Cria o client corretamente
-client = genai.GenerativeServiceClient(
+client = genai.Client(
     api_key=GEMINI_API_KEY,
-    transport="rest",
-    http_options=types.HttpOptions(api_version="v1alpha"),
+    http_options=types.HttpOptions(api_version='v1alpha')
 )
 
 st.title("Geração de Imagem com Gemini API")
@@ -29,20 +28,22 @@ if st.button("Gerar Imagem"):
     if prompt:
         with st.spinner("Gerando imagem..."):
             try:
-                response = client.generate_content(
-                    model="models/gemini-1.5-flash",
-                    prompt=prompt,
-                    generation_config={"response_mime_type": "image/png"},
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash-exp-image-generation",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["TEXT", "IMAGE"]
+                    )
                 )
 
                 if response.candidates and response.candidates[0].content.parts:
                     for part in response.candidates[0].content.parts:
-                        if part.inline_data is not None:
-                            image = Image.open(BytesIO(part.inline_data.data))
-                            st.image(image, caption=prompt, use_column_width=True)
-                        elif part.text is not None:
+                        if part.text is not None:
                             st.info("Texto gerado:")
                             st.write(part.text)
+                        elif part.inline_data is not None:
+                            image = Image.open(BytesIO(part.inline_data.data))
+                            st.image(image, caption=prompt, use_column_width=True)
                 else:
                     st.warning("Resposta vazia.")
                     st.write(response)
@@ -50,7 +51,15 @@ if st.button("Gerar Imagem"):
             except Exception as e:
                 st.error(f"Ocorreu um erro: {e}")
     else:
-        st.warning("Digite um prompt!")
+        st.warning("Por favor, digite um prompt.")
 
 st.sidebar.header("Configurações")
-st.sidebar.markdown("Usa a nova API Gemini via google-genai.")
+st.sidebar.markdown(
+    "Este aplicativo usa a API Gemini para gerar imagens a partir de prompts de texto."
+)
+st.sidebar.markdown(
+    "Certifique-se de ter configurado sua chave de API na seção 'Secrets' do Streamlit."
+)
+st.sidebar.markdown(
+    "Para mais informações, consulte a [documentação da API Gemini](https://ai.google.dev/docs)."
+)
