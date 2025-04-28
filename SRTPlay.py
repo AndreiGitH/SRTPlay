@@ -28,8 +28,8 @@ STYLE_SUFFIX = (
 )
 STYLE_SUFFIX = (
     "Renaissance painting, cinematic lighting, volumetric light, dramatic contrast, "
-    "film still, epic composition, highly detailed, 4K HDR, masterpiece, "
-    "shallow depth-of-field, 35 mm lens, Renaissance painting, biblical times, "
+    "epic composition, highly detailed, "
+    "shallow depth-of-field, biblical times, "
     "ancient Middle-East setting, 16:9, no text."
 )
 
