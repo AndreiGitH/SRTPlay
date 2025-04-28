@@ -8,7 +8,7 @@ import os
 GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 
 if not GEMINI_API_KEY:
-    st.error("A chave de API do Google Gemini não foi encontrada nos Streamlit Secrets. Certifique-se de configurá-la na seção 'Secrets' do seu aplicativo Streamlit.")
+    st.error("A chave de API do Gemini não foi encontrada nos Streamlit Secrets. Certifique-se de configurá-la na seção 'Secrets' do seu aplicativo Streamlit.")
     st.stop()
 
 genai.configure(api_key=GEMINI_API_KEY)
