@@ -45,8 +45,8 @@ if st.button("Gerar Imagem"):
        st.warning(
         "A resposta não continha dados de imagem. Verifique o prompt e a resposta da API."
        )
-        st.write(response)
-        else:
+       st.write(response)
+      else:
        st.warning(
         "A resposta não continha partes válidas. Verifique o prompt e a resposta da API."
        )
@@ -54,19 +54,19 @@ if st.button("Gerar Imagem"):
  
 
  except Exception as e:
- st.error(f"Ocorreu um erro: {e}")
- else:
- st.warning("Por favor, digite um prompt.")
+st.error(f"Ocorreu um erro: {e}")
+else:
+st.warning("Por favor, digite um prompt.")
  
 
 st.sidebar.header("Configurações")
 st.sidebar.markdown(
  "Este aplicativo usa a API Gemini para gerar imagens a partir de prompts de texto."
- )
+)
 st.sidebar.markdown(
  "Certifique-se de ter configurado sua chave de API do Google Cloud na seção 'Secrets' do seu aplicativo Streamlit."
- )
+)
 st.sidebar.markdown(
  "Para mais informações, consulte a [documentação da API Gemini](https://ai.google.dev/docs)."
- )
+)
  
