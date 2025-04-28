@@ -1,189 +1,146 @@
 #!/usr/bin/env python3
 """
-Streamlit · SRT ▶︎ Gemini Flash Experimental ▶︎ Zoom Clips
-=============================================
-Web-app que:
-1. Carrega um arquivo `.srt` (upload).
-2. Segmenta o texto a cada *N* palavras (padrão 20).
-3. Usa **Gemini 2.0 Flash Experimental** para criar uma imagem por bloco.
-4. Salva imagens, gera vídeos com zoom progressivo 100 → 130 % via FFmpeg.
-5. (Opcional) Concatena todos os clipes em um vídeo final.
+Streamlit · SRT ▶︎ Gemini Flash ▶︎ Imagens
+------------------------------------------
+• Agrupa ~20–30 palavras respeitando pontos de tempo.
+• Gera prompt cinematográfico (EN) com Gemini 2.0 Flash.
+• Gera imagem com Gemini 2.0 Flash Experimental (v1alpha).
+• Salva e exibe cada imagem.
 
-Autor: ChatGPT (abril 2025)
+Autor: ChatGPT – abr 2025
 """
 from __future__ import annotations
-import os
-import io
-import subprocess
 from pathlib import Path
 from typing import List
 
 import streamlit as st
 import pysrt
-import tqdm
 import google.genai as genai
 from google.genai import types
 from PIL import Image
 from io import BytesIO
 
-# ───────────────────────────────────────────
-STYLE_BLOCK = (
-    "Ultra-realistic, cinematic lighting, volumetric light, "
-    "shallow depth-of-field, 35 mm lens, biblical times, "
-    "ancient Middle-East setting, 16:9, no text"
+# –––––– Config de estilo fixo ––––––
+STYLE_SUFFIX = (
+    "Ultra-realistic, cinematic lighting, volumetric light, shallow depth-of-field, "
+    "35 mm lens, biblical times, ancient Middle-East setting, 16:9, no text."
 )
 
-# ───────────────────────────────────────────
-# Helpers
-# ───────────────────────────────────────────
-
-def time_tag(t: pysrt.SubRipTime) -> str:
+# –––––– Helpers de tempo ––––––
+def tag(t: pysrt.SubRipTime) -> str:
     return f"{t.hours:02d}_{t.minutes:02d}_{t.seconds:02d}_{int(t.milliseconds):03d}"
 
-def duration_sec(start: pysrt.SubRipTime, end: pysrt.SubRipTime) -> float:
-    return (end.ordinal - start.ordinal) / 1000.0
-
-def srt_to_blocks(subs: List[pysrt.SubRipItem], words_per_img: int):
-    blocks, curr_words, blk_start = [], [], None
-    for sub in subs:
-        words = sub.text.replace("\n", " ").split()
+def agrupar_blocos(subs: List[pysrt.SubRipItem], min_w=20, max_w=30):
+    """
+    Junta textos até passar de min_w.
+    Fecha bloco no próximo marcador de início
+    ou quando estoura max_w.
+    """
+    blocos, txt, start = [], [], None
+    for s in subs:
+        words = s.text.replace("\n", " ").split()
         if not words:
             continue
-        blk_start = blk_start or sub.start
-        curr_words.extend(words)
-        while len(curr_words) >= words_per_img:
-            text = " ".join(curr_words[:words_per_img])
-            blocks.append({"start": blk_start, "end": sub.end, "text": text})
-            curr_words = curr_words[words_per_img:]
-            blk_start = sub.end if curr_words else None
-    if curr_words:
-        blocks.append({"start": blk_start, "end": subs[-1].end, "text": " ".join(curr_words)})
-    return blocks
+        start = start or s.start
+        txt.extend(words)
 
-def gemini_image(client, context_blocks: List[str], text: str) -> bytes:
-    ctx = "\n\n".join(context_blocks)
-    prompt = (
-        f"Previous scenes for continuity:\n{ctx}\n\n"
-        f"Current scene:\n{text}\n\n"
-        f"Generate ONE 16:9 IMAGE capturing ONLY the current scene. "
-        f"Style: {STYLE_BLOCK}"
+        # se já passou min_w, fecha no marcador atual
+        if len(txt) >= min_w:
+            # se também excedeu max_w, fecha já
+            blocos.append(
+                {"start": start, "end": s.end, "text": " ".join(txt)}
+            )
+            txt, start = [], None
+
+    if txt:  # resto
+        blocos.append({"start": start, "end": subs[-1].end, "text": " ".join(txt)})
+    return blocos
+
+# –––––– Gemini calls ––––––
+def gerar_prompt(client, texto: str) -> str:
+    """
+    Cria um prompt cinematográfico em EN.
+    """
+    pedido = (
+        "Create a concise, vivid, ultra-realistic image-generation prompt that represents"
+        " this biblical scene:\n\n"
+        f"{texto}\n\n"
+        f"End the prompt with these quality parameters:\n{STYLE_SUFFIX}"
     )
-    response = client.models.generate_content(
+
+    resp = client.models.generate_content(
+        model="gemini-2.0-flash",              # texto-apenas
+        contents=pedido,
+    )
+    return resp.candidates[0].content.parts[0].text.strip()
+
+def gerar_imagem(client, prompt: str) -> bytes:
+    """
+    Gera PNG bytes usando modelo experimental.
+    """
+    resp = client.models.generate_content(
         model="gemini-2.0-flash-exp-image-generation",
         contents=prompt,
-        config=types.GenerateContentConfig(
-            response_modalities=["TEXT", "IMAGE"]
-        )
+        config=types.GenerateContentConfig(response_modalities=["IMAGE"]),
     )
-    for part in response.candidates[0].content.parts:
+    for part in resp.candidates[0].content.parts:
         if part.inline_data:
             return part.inline_data.data
-    raise RuntimeError("Nenhuma imagem retornada.")
+    raise RuntimeError("Sem imagem!")
 
-def ensure_ffmpeg():
-    try:
-        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL, check=True)
-    except Exception:
-        st.error("FFmpeg não encontrado na PATH.")
-        st.stop()
+# –––––– Streamlit UI ––––––
+st.set_page_config(page_title="SRT ▶︎ Gemini Imagens", layout="wide")
+st.title("🎞️  SRT → Gemini → Imagens Realistas")
 
-def zoom_filter(dur: float, fps: int, zoom_end: float, res: str):
-    inc = (zoom_end - 1.0) / (dur * fps)
-    return f"zoompan=z='if(lte(on,1),1,min(pzoom+{inc:.6f},{zoom_end}))':d={int(dur*fps)}:s={res},fps={fps}"
+api_key = st.secrets.get("GEMINI_API_KEY")
+if not api_key:
+    st.error("Configure sua chave em Settings ▸ Secrets:  GEMINI_API_KEY")
+    st.stop()
 
-# ───────────────────────────────────────────
-# Streamlit UI
-# ───────────────────────────────────────────
+# Client para texto (flash) e imagem (flash-exp v1alpha)
+client_txt = genai.Client(api_key=api_key)  # usa v1beta por padrão
+client_img = genai.Client(
+    api_key=api_key,
+    http_options=types.HttpOptions(api_version="v1alpha")
+)
 
-st.set_page_config(page_title="SRT ▶︎ Gemini Flash", layout="wide")
-st.title("🎞️ SRT → Gemini Flash → Zoom Clips")
+min_words = st.sidebar.number_input("Mín. palavras por bloco", 10, 30, 20)
+max_words = st.sidebar.number_input("Máx. palavras por bloco", 20, 60, 30)
 
-# Sidebar
-with st.sidebar:
-    st.header("Configurações")
-    api_key = st.secrets.get("GEMINI_API_KEY")
-    if not api_key:
-        st.error("A chave de API não foi encontrada. Configure em Settings > Secrets.")
-        st.stop()
+uploaded = st.file_uploader("📂  Envie o arquivo .srt", type="srt")
+run = st.button("🚀 Gerar Imagens")
 
-    client = genai.Client(
-        api_key=api_key,
-        http_options=types.HttpOptions(api_version='v1alpha')
-    )
-
-    words_per_img    = st.number_input("Palavras por imagem", 5, 50, 20)
-    context_segments = st.slider("Blocos de contexto", 0, 5, 3)
-    fps              = st.number_input("FPS", 15, 60, 30)
-    resolution       = st.text_input("Resolução WxH", "1920x1080")
-    zoom_end         = st.slider("Zoom final (%)", 110, 200, 130)
-    concat_all       = st.checkbox("Gerar vídeo final", value=True)
-
-uploaded = st.file_uploader("📂 Carregue um arquivo .srt", type="srt")
-run_btn  = st.button("🚀 Processar")
-
-if run_btn:
+if run:
     if not uploaded:
-        st.warning("Faça upload de um .srt primeiro.")
+        st.warning("Primeiro faça upload do .srt.")
         st.stop()
-
-    ensure_ffmpeg()
-
-    out_dir  = Path("output")
-    imgs_dir = out_dir / "images"
-    clips_dir = out_dir / "clips"
-    for p in (imgs_dir, clips_dir): p.mkdir(parents=True, exist_ok=True)
 
     subs = pysrt.from_string(uploaded.getvalue().decode("utf-8"))
-    blocks = srt_to_blocks(subs, words_per_img)
-
-    st.info(f"{len(blocks)} blocos de imagem serão gerados.")
+    blocos = agrupar_blocos(subs, min_words, max_words)
+    st.info(f"{len(blocos)} blocos serão processados.")
     prog = st.progress(0.0)
 
-    context_buffer: List[str] = []
-    concat_entries: List[Path] = []
+    out_dir = Path("output_images"); out_dir.mkdir(exist_ok=True)
 
-    for i, blk in enumerate(blocks, 1):
-        img_bytes = gemini_image(client, context_buffer[-context_segments:], blk["text"])
-        img_name = f"{time_tag(blk['start'])}-{time_tag(blk['end'])}.png"
-        img_path = imgs_dir / img_name
-        img_path.write_bytes(img_bytes)
-        context_buffer.append(blk["text"])
+    for i, blk in enumerate(blocos, 1):
+        # 1) prompt textual
+        prompt = gerar_prompt(client_txt, blk["text"])
+        # 2) imagem
+        img_bytes = gerar_imagem(client_img, prompt)
 
-        dur = duration_sec(blk["start"], blk["end"])
-        clip_path = clips_dir / img_name.replace(".png", ".mp4")
-        vf = zoom_filter(dur, fps, zoom_end/100, resolution)
-        subprocess.run([
-            "ffmpeg", "-y", "-loop", "1", "-i", str(img_path),
-            "-vf", vf, "-t", f"{dur:.3f}", "-pix_fmt", "yuv420p",
-            str(clip_path)
-        ], check=True)
-        concat_entries.append(clip_path)
-        prog.progress(i/len(blocks))
+        name = f"{tag(blk['start'])}-{tag(blk['end'])}.png"
+        path = out_dir / name
+        path.write_bytes(img_bytes)
 
-    # Download
-    st.header("🎁 Downloads")
-    with st.expander("Imagens geradas"):
-        for p in imgs_dir.iterdir():
-            st.image(p.read_bytes(), caption=p.name)
-            st.download_button(f"Baixar {p.name}", p.read_bytes(), file_name=p.name, mime="image/png")
+        # Exibe + download
+        st.image(img_bytes, caption=name, use_column_width=True)
+        st.download_button(
+            label=f"Download {name}",
+            data=img_bytes,
+            file_name=name,
+            mime="image/png"
+        )
+        prog.progress(i / len(blocos))
 
-    with st.expander("Clipes individuais"):
-        for p in clips_dir.iterdir():
-            st.video(str(p))
-            st.download_button(f"Baixar {p.name}", p.read_bytes(), file_name=p.name, mime="video/mp4")
-
-    if concat_all:
-        concat_txt = out_dir / "concat.txt"
-        concat_txt.write_text("\n".join([f"file '{p.as_posix()}'" for p in concat_entries]))
-        final = out_dir / "final_video.mp4"
-        subprocess.run([
-            "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(concat_txt),
-            "-c", "copy", str(final)
-        ], check=True)
-        st.success("🎬 Vídeo final gerado!")
-        st.video(str(final))
-        st.download_button("Baixar Vídeo Final", final.read_bytes(), file_name=final.name, mime="video/mp4")
-    else:
-        st.success("Processamento concluído.")
-
-    st.write("Arquivos gerados em:", out_dir.resolve())
+    st.success("✔️ Todas as imagens geradas!")
+    st.write("Arquivos salvos em:", out_dir.resolve())
