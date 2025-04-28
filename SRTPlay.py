@@ -72,3 +72,4 @@
  st.sidebar.markdown(
   "Para mais informações, consulte a [documentação da API Gemini](https://ai.google.dev/docs)."
   )
+ 
