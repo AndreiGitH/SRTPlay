@@ -1,5 +1,6 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from PIL import Image
 from io import BytesIO
 
@@ -13,7 +14,11 @@ if not GEMINI_API_KEY:
     )
     st.stop()
 
+# Configura a API
 genai.configure(api_key=GEMINI_API_KEY)
+
+# Instancia o cliente
+client = genai.Client()
 
 st.title("Geração de Imagem com Gemini API")
 
@@ -26,26 +31,24 @@ if st.button("Gerar Imagem"):
     if prompt:
         with st.spinner("Gerando imagem..."):
             try:
-                model = genai.GenerativeModel(
-                    model_name="gemini-2.0-flash-exp-image-generation"
-                )
-                response = model.generate_content(
-                    contents=prompt
-                )
-                if response.parts:
-                    for part in response.parts:
-                        if hasattr(part, "data"):
-                            image = Image.open(BytesIO(part.data))
-                            st.image(image, caption=prompt, use_column_width=True)
-                        else:
-                            st.warning(
-                                "A resposta não continha dados de imagem. Verifique o prompt e a resposta da API."
-                            )
-                            st.write(response)
-                else:
-                    st.warning(
-                        "A resposta não continha partes válidas. Verifique o prompt e a resposta da API."
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash-exp-image-generation",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_modalities=["TEXT", "IMAGE"]
                     )
+                )
+
+                if response.candidates and response.candidates[0].content.parts:
+                    for part in response.candidates[0].content.parts:
+                        if part.text is not None:
+                            st.info("Texto gerado:")
+                            st.write(part.text)
+                        elif part.inline_data is not None:
+                            image = Image.open(BytesIO(part.inline_data.data))
+                            st.image(image, caption=prompt, use_column_width=True)
+                else:
+                    st.warning("A resposta não continha partes válidas. Verifique o prompt e a resposta da API.")
                     st.write(response)
 
             except Exception as e:
