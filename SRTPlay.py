@@ -79,7 +79,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     return f"{texto}, {STYLE_SUFFIX}"
 
 # —— gerar imagem com guard completo ——
-def gerar_imagem(client_img, prompt: str, tries: int = 3) -> bytes | None:
+def gerar_imagem(client_img, prompt: str, tries: int = 7) -> bytes | None:
     for attempt in range(tries):
         try:
             resp = client_img.models.generate_content(
@@ -140,7 +140,7 @@ if st.button("🚀 Gerar Imagens"):
         img_bytes = gerar_imagem(client_img, prompt)
 
         if img_bytes is None:
-            st.warning(f"⚠️ Bloco {i}: sem imagem após {tries} tentativas, pulado.")
+            st.warning(f"⚠️ Bloco {i}: sem imagem após tentativas, pulado.")
             prog.progress(i / len(blocos))
             continue
 
