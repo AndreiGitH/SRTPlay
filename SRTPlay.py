@@ -13,7 +13,7 @@ from io import BytesIO
 
 # —— estilo turbinado ——
 STYLE_SUFFIX = (
-    "3d rendered image,"
+    "pixar image,"
     "biblical times, "
     "ancient Middle-East setting, 16:9 aspect ratio, no text."
 )
