@@ -5,13 +5,13 @@ import io
 import os
 
 # Carrega a chave de API do Streamlit Secrets
-GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
+GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 
-if not GOOGLE_API_KEY:
+if not GEMINI_API_KEY:
     st.error("A chave de API do Google Gemini não foi encontrada nos Streamlit Secrets. Certifique-se de configurá-la na seção 'Secrets' do seu aplicativo Streamlit.")
     st.stop()
 
-genai.configure(api_key=GOOGLE_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
 model_name = 'gemini-2.0-flash-exp-image-generation'
 model = genai.GenerativeModel(model_name)
 
