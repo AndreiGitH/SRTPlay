@@ -4,8 +4,7 @@ from PIL import Image
 from io import BytesIO
 import base64
 
-client = genai.Client()
-
+client = genai.Client(api_key='AIzaSyAR3lzLvM8taP2jZk_31zz9Rqx_IBiBtW8')
 contents = ('Hi, can you create a 3d rendered image of a pig '
             'with wings and a top hat flying over a happy '
             'futuristic scifi city with lots of greenery?')
