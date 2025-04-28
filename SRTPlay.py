@@ -36,23 +36,20 @@ if st.button("Gerar Imagem"):
     response = model.generate_content(
      contents=prompt
     )
- if response.parts:
- for part in response.parts:
- if hasattr(part, "data"):
- image = Image.open(BytesIO((part.data)))
- st.image(image, caption=prompt, use_column_width=True)
- else:
- st.warning(
- "A resposta não continha dados de imagem. Verifique o prompt e a resposta da API."
- )
- st.write(response)
- 
-
- else:
- st.warning(
- "A resposta não continha partes válidas. Verifique o prompt e a resposta da API."
- )
- st.write(response)
+    if response.parts:
+     for part in response.parts:
+      if hasattr(part, "data"):
+       image = Image.open(BytesIO((part.data)))
+       st.image(image, caption=prompt, use_column_width=True)
+      else:
+       st.warning(
+        "A resposta não continha dados de imagem. Verifique o prompt e a resposta da API."
+        st.write(response)
+        else:
+       st.warning(
+        "A resposta não continha partes válidas. Verifique o prompt e a resposta da API."
+       )
+       st.write(response)
  
 
  except Exception as e:
