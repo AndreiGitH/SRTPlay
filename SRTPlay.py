@@ -112,7 +112,7 @@ def gerar_imagem(client_img, prompt: str, tries: int = 20) -> bytes | None:
                 config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             )
         except Exception:
-            time.sleep(1.0)
+            time.sleep(2.0)
             continue
 
         if resp and resp.candidates:
