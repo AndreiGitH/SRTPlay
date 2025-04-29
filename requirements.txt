@@ -2,3 +2,5 @@ streamlit>=1.32
 google-genai>=0.8.5          # SDK novo
 pysrt>=1.1.2
 pillow>=9.0.0
+streamlit>=1.32
+replicate>=0.10.0      # cliente oficial Replicate
