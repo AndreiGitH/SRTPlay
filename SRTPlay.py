@@ -83,7 +83,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     # 1a tentativa: gerar prompt direto
     pedido = (
         "Create a concise, vivid, ultra-realistic image generation prompt that represents "
-        "this biblical scene. The prompt must end with the quality parameters and explicitly "
+        "this biblical scene. If it has a character, use a close-up. The prompt must end with the quality parameters and explicitly "
         "keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
