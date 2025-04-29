@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+import os, io, zipfile, time, re
 from pathlib import Path
 from typing import List
-import time, io, zipfile
 
 import streamlit as st
 import pysrt
@@ -10,9 +10,8 @@ import google.genai as genai
 from google.genai import types
 from PIL import Image
 from io import BytesIO
-import re
 
-# —— estilo turbinado ——
+# ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     "Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     "film still, epic composition, highly detailed, 4K HDR, masterpiece, "
@@ -20,70 +19,47 @@ STYLE_SUFFIX = (
     "ancient Middle-East setting, 16:9 aspect ratio, no text overlay."
 )
 
-# —— session state init ——
+# ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
-    st.session_state["imgs"] = []  # lista de dicts {"name","bytes","prompt"}
+    st.session_state["imgs"] = []    # [{"name","bytes","prompt"}]
+if "blocos" not in st.session_state:
+    st.session_state["blocos"] = []  # guarda blocos após agrupar
 
-# —— helpers de tempo ——
+# ─── Helpers de tempo e prompt ──────────────────
 def tag(t: pysrt.SubRipTime) -> str:
     return f"{t.hours:02d}_{t.minutes:02d}_{t.seconds:02d}_{int(t.milliseconds):03d}"
 
 def agrupar_blocos(subs: List[pysrt.SubRipItem], min_w=20, max_w=30):
     blocos, txt, start = [], [], None
     for s in subs:
-        words = s.text.replace("\n", " ").split()
-        if not words:
-            continue
+        words = s.text.replace("\n"," ").split()
+        if not words: continue
         start = start or s.start
         txt.extend(words)
         if len(txt) >= min_w:
             blocos.append({
-                "start": start,
-                "end": s.end,
+                "start": start, "end": s.end,
                 "text": " ".join(txt[:max_w])
             })
             txt, start = [], None
     if txt:
         blocos.append({
-            "start": start,
-            "end": subs[-1].end,
+            "start": start, "end": subs[-1].end,
             "text": " ".join(txt)
         })
     return blocos
 
-# —— gerar prompt cinematográfico ——
 def clean_prompt(raw: str) -> str:
-    """
-    Limpa o texto gerado pelo Gemini, removendo cabeçalhos markdown,
-    introduções e asteriscos, retornando só o prompt puro.
-    """
-    # 1) Remove blocos “**Prompt:**” ou “Prompt:” e tudo antes
-    #    Pegamos o que vem depois da última ocorrência de “Prompt:”
     parts = re.split(r"\*{0,2}Prompt\*{0,2}:\s*", raw)
-    body = parts[-1] if len(parts) > 1 else raw
-
-    # 2) Remove frases iniciais genéricas, por ex. "Here's a concise, vivid..."
-    body = re.sub(r"^Here(?:'|’)s a [^:]+:\s*", "", body)
-
-    # 3) Remove quaisquer asteriscos remanescentes e linhas em branco extras
-    body = body.replace("*", "").strip()
-
-    # 4) Opcional: normalize espaçamento
-    body = re.sub(r"\s+\n", "\n", body)
-    body = re.sub(r"\n\s+", "\n", body)
-
-    return body
+    body = parts[-1] if len(parts)>1 else raw
+    body = re.sub(r"^Here(?:'|’)s a [^:]+:\s*","", body)
+    body = body.replace("*","").strip()
+    return re.sub(r"\s+", " ", body)
 
 def gerar_prompt(client_txt, texto: str) -> str:
-    """
-    Gera prompt cinematográfico. Se o retorno for claramente
-    apenas o texto original (fallback), faz uma segunda chamada
-    com instrução de “translate & describe in English”.
-    """
-    # 1a tentativa: gerar prompt direto
     pedido = (
         "Create a concise, vivid, ultra-realistic image generation prompt that represents "
-        "this biblical scene. If it has a character, use a close-up. The prompt must end with the quality parameters and explicitly "
+        "this biblical scene. The prompt must end with the quality parameters and explicitly "
         "keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
@@ -93,42 +69,14 @@ def gerar_prompt(client_txt, texto: str) -> str:
             model="gemini-2.0-flash",
             contents=pedido
         )
-        raw = ""
-        if resp.candidates:
-            raw = resp.candidates[0].content.parts[0].text or ""
-        prompt1 = clean_prompt(raw)
+        raw = resp.candidates[0].content.parts[0].text or ""
+        prompt = clean_prompt(raw)
+        if prompt and not prompt.startswith(texto[:10]):
+            return prompt
     except Exception:
-        prompt1 = ""
+        pass
+    return f"{texto}, {STYLE_SUFFIX}"
 
-    # Detecta fallback: começa com o próprio texto (em pt) ou vazio
-    if not prompt1 or prompt1.startswith(texto[:30]):
-        # 2a tentativa: traduz e descreve em inglês
-        second = (
-            "Translate the following scene description into a concise English prompt "
-            "for ultra-realistic image generation (keep 16:9, no text overlay):\n\n"
-            f"{texto}\n\n"
-            f"Quality parameters:\n{STYLE_SUFFIX}"
-        )
-        try:
-            resp2 = client_txt.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=second
-            )
-            raw2 = ""
-            if resp2.candidates:
-                raw2 = resp2.candidates[0].content.parts[0].text or ""
-            prompt2 = clean_prompt(raw2)
-            if prompt2 and not prompt2.startswith(texto[:30]):
-                return prompt2
-        except Exception:
-            pass
-        # Se ainda não deu, cai num prompt genérico em inglês
-        return f"Biblical scene of: {texto[:50]}..., {STYLE_SUFFIX}"
-
-    return prompt1
-
-
-# —— gerar imagem com retentativas ——
 def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
     for _ in range(tries):
         try:
@@ -140,7 +88,6 @@ def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
         except Exception:
             time.sleep(2.0)
             continue
-
         if resp and resp.candidates:
             cand0 = resp.candidates[0]
             if cand0.content and getattr(cand0.content, "parts", None):
@@ -150,29 +97,47 @@ def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
         time.sleep(1.2)
     return None
 
-# —— Streamlit UI ——
+# ─── Streamlit UI ───────────────────────────────
 st.set_page_config(page_title="SRT ▶︎ Gemini Imagens", layout="wide")
 st.title("🎞️ SRT → Gemini Flash → Imagens Cinematográficas")
 
+# Autenticação
 api_key = st.secrets.get("GEMINI_API_KEY")
 if not api_key:
     st.error("Configure GEMINI_API_KEY em Settings ▸ Secrets.")
     st.stop()
-
 client_txt = genai.Client(api_key=api_key)
 client_img = genai.Client(
-    api_key=api_key,
+    api_key=api_key, 
     http_options=types.HttpOptions(api_version="v1alpha")
 )
 
+# Controles
 min_w = st.sidebar.number_input("Mín. palavras/bloco", 10, 30, 20)
 max_w = st.sidebar.number_input("Máx. palavras/bloco", 20, 60, 30)
 
+block_nums_str = st.sidebar.text_input(
+    "Blocos a (re)processar (índices, ex: 51,75):", ""
+)
+timestamps_str = st.sidebar.text_area(
+    "Timestamps a (re)processar (uma por linha, sem .png):", ""
+)
+
+# Converte filtros
+selected_idxs = set()
+if block_nums_str.strip():
+    try:
+        selected_idxs = {int(x) for x in re.split(r"[,\s]+", block_nums_str) if x.strip()}
+    except ValueError:
+        st.error("Formato inválido em 'Blocos'. Use números separados por vírgula.")
+selected_ts = {line.strip() for line in timestamps_str.splitlines() if line.strip()}
+
 uploaded = st.file_uploader("📂 Faça upload do .srt", type="srt")
 
+# ─── Botão: Gerar Imagens (com filtros) ───────
 if st.button("🚀 Gerar Imagens"):
-    # limpa estado anterior
-    st.session_state["imgs"] = []
+    st.session_state["imgs"]   = []
+    st.session_state["blocos"] = []
 
     if not uploaded:
         st.warning("Envie um .srt primeiro.")
@@ -180,69 +145,83 @@ if st.button("🚀 Gerar Imagens"):
 
     subs   = pysrt.from_string(uploaded.getvalue().decode("utf-8"))
     blocos = agrupar_blocos(subs, min_w, max_w)
-    st.info(f"{len(blocos)} blocos serão processados.")
+    st.session_state["blocos"] = blocos
+    st.info(f"{len(blocos)} blocos total; aplicando filtros...")
     prog = st.progress(0.0)
-
     out_dir = Path("output_images"); out_dir.mkdir(exist_ok=True)
 
     for i, blk in enumerate(blocos, 1):
-        prompt    = gerar_prompt(client_txt, blk["text"])
-        img_bytes = gerar_imagem(client_img, prompt)
-
-        if img_bytes is None:
-            st.warning(f"⚠️ Bloco {i}: nenhuma imagem retornada, pulado.")
-            prog.progress(i / len(blocos))
+        key = f"{tag(blk['start'])}-{tag(blk['end'])}"
+        # aplica filtros
+        if selected_idxs and i not in selected_idxs:
+            continue
+        if selected_ts and key not in selected_ts:
             continue
 
-        fname = f"{tag(blk['start'])}-{tag(blk['end'])}.png"
-        (out_dir / fname).write_bytes(img_bytes)
+        prompt    = gerar_prompt(client_txt, blk["text"])
+        img_bytes = gerar_imagem(client_img, prompt)
+        if img_bytes is None:
+            st.warning(f"⚠️ Bloco {i} ({key}): sem imagem, pulado.")
+            prog.progress(i/len(blocos))
+            continue
 
-        # guarda nome, bytes e prompt
-        st.session_state["imgs"].append({
-            "name":   fname,
-            "bytes":  img_bytes,
-            "prompt": prompt
-        })
-        prog.progress(i / len(blocos))
+        fname = f"{key}.png"
+        (out_dir/fname).write_bytes(img_bytes)
+        st.session_state["imgs"].append({"name":fname,"bytes":img_bytes,"prompt":prompt})
+        prog.progress(i/len(blocos))
 
-    st.success("✔️ Processamento concluído! Veja a galeria abaixo.")
+    st.success("✔️ Processamento concluído!")
 
-# —— galeria persistente + downloads ——
+# ─── Botão: Reprocessar falhas ────────────────
+if st.session_state["blocos"] and st.button("🔄 Reprocessar falhas"):
+    prog = st.progress(0.0)
+    total = len(st.session_state["blocos"])
+    for i, blk in enumerate(st.session_state["blocos"], 1):
+        key = f"{tag(blk['start'])}-{tag(blk['end'])}"
+        # pula se já gerada
+        if any(item["name"] == f"{key}.png" for item in st.session_state["imgs"]):
+            continue
+        # aplica filtros
+        if selected_idxs and i not in selected_idxs:
+            continue
+        if selected_ts and key not in selected_ts:
+            continue
+
+        prompt = gerar_prompt(client_txt, blk["text"])
+        img_bytes = gerar_imagem(client_img, prompt)
+        if img_bytes:
+            fname = f"{key}.png"
+            st.session_state["imgs"].append({"name":fname,"bytes":img_bytes,"prompt":prompt})
+        prog.progress(i/total)
+    st.success("🔄 Reprocessamento concluído!")
+
+# ─── Galeria + downloads ──────────────────────
 if st.session_state["imgs"]:
     st.header("📸 Imagens Geradas")
     for idx, item in enumerate(st.session_state["imgs"]):
         st.image(item["bytes"], caption=item["name"], use_column_width=True)
         st.download_button(
-            label=f"Baixar {item['name']}",
-            data=item["bytes"],
+            f"Baixar {item['name']}",
+            item["bytes"],
             file_name=item["name"],
             mime="image/png",
             key=f"dl-{idx}-{item['name']}"
         )
 
-    # botão ZIP
+    # ZIP on-the-fly
     buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        for item in st.session_state["imgs"]:
-            zf.writestr(item["name"], item["bytes"])
+    with zipfile.ZipFile(buf,"w",zipfile.ZIP_DEFLATED) as zf:
+        for itm in st.session_state["imgs"]:
+            zf.writestr(itm["name"], itm["bytes"])
     buf.seek(0)
     st.download_button(
         "⬇️ Baixar todas as imagens (.zip)",
-        data=buf,
-        file_name="todas_as_imagens.zip",
-        mime="application/zip",
-        key="zip-all"
+        buf, "todas_as_imagens.zip", "application/zip"
     )
 
-    # botão de download de prompts
-    prompts_txt = "\n\n".join(
-        f"{item['name']}: {item['prompt']}"
-        for item in st.session_state["imgs"]
-    )
+    # Prompts.txt
+    txt = "\n\n".join(f"{itm['name']}: {itm['prompt']}" for itm in st.session_state["imgs"])
     st.download_button(
-        "⬇️ Baixar todos os prompts (.txt)",
-        data=prompts_txt,
-        file_name="prompts.txt",
-        mime="text/plain",
-        key="dl-prompts"
+        "⬇️ Baixar Prompts (.txt)",
+        txt, "prompts.txt", "text/plain"
     )
