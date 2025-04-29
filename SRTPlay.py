@@ -17,7 +17,7 @@ STYLE_SUFFIX = (
     "Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     "film still, epic composition, highly detailed, 4K HDR, masterpiece, "
     "shallow depth-of-field, 35 mm lens, photorealistic, biblical times, "
-    "ancient Middle-East setting, 16:9 aspect ratio."
+    "ancient Middle-East setting, 16:9 aspect ratio, no text overlay."
 )
 
 # —— session state init ——
@@ -76,11 +76,14 @@ def clean_prompt(raw: str) -> str:
 
 def gerar_prompt(client_txt, texto: str) -> str:
     """
-    Pede ao Gemini um prompt cinematográfico e limpa a saída.
+    Gera prompt cinematográfico. Se o retorno for claramente
+    apenas o texto original (fallback), faz uma segunda chamada
+    com instrução de “translate & describe in English”.
     """
+    # 1a tentativa: gerar prompt direto
     pedido = (
-        "Create a concise, vivid, ultra-realistic image generation prompt wihout text that represents "
-        "this biblical scene. If it has a character, use a close-up. The prompt must end with the quality parameters and explicitly "
+        "Create a concise, vivid, ultra-realistic image generation prompt that represents "
+        "this biblical scene. The prompt must end with the quality parameters and explicitly "
         "keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
@@ -90,16 +93,39 @@ def gerar_prompt(client_txt, texto: str) -> str:
             model="gemini-2.0-flash",
             contents=pedido
         )
-        if resp and resp.candidates:
-            cand0 = resp.candidates[0]
-            if cand0.content and getattr(cand0.content, "parts", None):
-                raw = cand0.content.parts[0].text or ""
-                return clean_prompt(raw)
+        raw = ""
+        if resp.candidates:
+            raw = resp.candidates[0].content.parts[0].text or ""
+        prompt1 = clean_prompt(raw)
     except Exception:
-        pass
+        prompt1 = ""
 
-    # fallback: garantimos também limpar o fallback
-    return clean_prompt(f"{texto}, {STYLE_SUFFIX}")
+    # Detecta fallback: começa com o próprio texto (em pt) ou vazio
+    if not prompt1 or prompt1.startswith(texto[:30]):
+        # 2a tentativa: traduz e descreve em inglês
+        second = (
+            "Translate the following scene description into a concise English prompt "
+            "for ultra-realistic image generation (keep 16:9, no text overlay):\n\n"
+            f"{texto}\n\n"
+            f"Quality parameters:\n{STYLE_SUFFIX}"
+        )
+        try:
+            resp2 = client_txt.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=second
+            )
+            raw2 = ""
+            if resp2.candidates:
+                raw2 = resp2.candidates[0].content.parts[0].text or ""
+            prompt2 = clean_prompt(raw2)
+            if prompt2 and not prompt2.startswith(texto[:30]):
+                return prompt2
+        except Exception:
+            pass
+        # Se ainda não deu, cai num prompt genérico em inglês
+        return f"Biblical scene of: {texto[:50]}..., {STYLE_SUFFIX}"
+
+    return prompt1
 
 
 # —— gerar imagem com retentativas ——
