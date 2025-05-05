@@ -13,7 +13,7 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "Pixar style, cinematic lighting, volumetric light, dramatic contrast, "
+    "3D style, cinematic lighting, volumetric light, dramatic contrast, "
     #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     "film still, epic composition, highly detailed, masterpiece, "
     "shallow depth-of-field, 35 mm lens, biblical times, "
