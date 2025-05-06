@@ -17,7 +17,8 @@ STYLE_SUFFIX = (
     #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     "film still, epic composition, highly detailed, masterpiece, "
     "shallow depth-of-field, 35 mm lens, biblical times, "
-    "ancient Middle-East setting, aspect ratio: 16:9, 1024x574, photorealistic, no text overlay."
+    #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, photorealistic, no text overlay."
+    "ancient Middle-East setting, aspect ratio: 16:9, 1024x574, no text overlay."
 )
 
 # ─── session_state ─────────────────────────────
