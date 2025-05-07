@@ -13,12 +13,13 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "pencil sketch, high detailed, colored pencil style"
+    "pencil sketch, high detailed, colored pencil style, "
     #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     #"film still, epic composition, highly detailed, masterpiece, "
     #"shallow depth-of-field, 35 mm lens, biblical times, "
     #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, photorealistic, no text overlay."
-    "ancient Middle-East setting, aspect ratio: 16:9, 1024x574, no text overlay."
+    #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, no text overlay."
+    "aspect ratio: 16:9, 1024x574, no text overlay."
 )
 
 # ─── session_state ─────────────────────────────
@@ -62,8 +63,9 @@ def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         #"Create a concise, vivid, ultra-realistic image generation prompt that represents "
         "Create a concise, vivid, image generation prompt that represents "
-        "this biblical scene. " 
-        #"If it has a character, make a medium close-up. "
+        "this scene. " 
+        #"this biblical scene. " 
+        "If it has a character, make a medium close-up. "
         "The prompt must end with the quality parameters and explicitly "
         "keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
