@@ -65,7 +65,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         "Create a concise, vivid, image generation prompt that represents "
         "this scene. " 
         #"this biblical scene. " 
-        "If it has a character, make a medium close-up. "
+        #"If it has a character, make a medium close-up. "
         "The prompt must end with the quality parameters and explicitly "
         "keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
