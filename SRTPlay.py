@@ -13,8 +13,8 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "Ultra-realistic, "
-    #"pencil sketch, colored pencil style, high detailed,  "
+    #"Ultra-realistic, "
+    "pencil sketch, colored pencil style, high detailed,  "
     #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     #"film still, epic composition, highly detailed, masterpiece, "
     #"shallow depth-of-field, 35 mm lens, biblical times, "
