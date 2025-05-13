@@ -62,7 +62,7 @@ def clean_prompt(raw: str) -> str:
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         #"Create a concise, vivid, ultra-realistic image generation prompt that represents "
-        "Create a concise, vivid, image generation prompt that represents "
+        "Create a concise, image generation prompt that represents "
         "this scene. " 
         #"this biblical scene. " 
         #"If it has a character, make a medium close-up. "
