@@ -21,7 +21,7 @@ STYLE_SUFFIX = (
     #"shallow depth-of-field, 35 mm lens, biblical times, "
     #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, photorealistic, no text overlay."
     #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, no text overlay."
-    "aspect ratio: 16:9, 1024x574."
+    "aspect_ratio= 16:9, size=1024x574"
 )
 
 # ─── session_state ─────────────────────────────
