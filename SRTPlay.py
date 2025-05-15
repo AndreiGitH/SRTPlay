@@ -20,7 +20,7 @@ STYLE_SUFFIX = (
     #"shallow depth-of-field, 35 mm lens, biblical times, "
     #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, photorealistic, no text overlay."
     #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, no text overlay."
-    "aspect ratio: 16:9, 1024x574, no text overlay."
+    "aspect ratio: 16:9, 1024x574."
 )
 
 # ─── session_state ─────────────────────────────
@@ -63,8 +63,8 @@ def clean_prompt(raw: str) -> str:
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         #"Create a concise, vivid, ultra-realistic image generation prompt that represents "
-        "Create a concise, vivid, image generation prompt that represents "
-        "this scene. " 
+        "Create a concise, vivid, image generation prompt, that represents "
+        "this scene, with no text overlay. " 
         #"this biblical scene. " 
         #"If it has a character, make a medium close-up. "
         "The prompt must end with the quality parameters and explicitly "
