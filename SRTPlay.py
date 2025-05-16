@@ -13,7 +13,8 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "pencil sketch colored, visible strokes, high detailed, textured paper, "
+    "pencil sketch colored, high detailed, textured paper, "
+    #"pencil sketch colored, visible strokes, high detailed, textured paper, "
     #"Ultra-realistic, "
     #"pencil sketch, colored pencil style, high detailed,  "
         #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
