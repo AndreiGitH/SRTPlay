@@ -15,6 +15,13 @@ from io import BytesIO
 STYLE_SUFFIX = (
     "pencil sketch colored, high detailed, "
     "ancient Middle-East setting, wide"
+    #"pencil sketch colored, textured paper, high detailed, "
+    #"pencil sketch colored, visible strokes, high detailed, textured paper, "
+    #"Ultra-realistic, "
+    #"pencil sketch, colored pencil style, high detailed,  "
+    #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
+    #"film still, epic composition, highly detailed, masterpiece, "
+    #"shallow depth-of-field, 35 mm lens, biblical times, "
 )
 
 # ─── session_state ─────────────────────────────
@@ -63,6 +70,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         "Create a concise, vivid, image generation prompt, that represents "
         "this scene, with no text overlay. "
+        "The prompt must end with the quality parameters and explicitly "
         f"Scene:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
     )
