@@ -14,17 +14,7 @@ from io import BytesIO
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     "pencil sketch colored, high detailed, "
-    #"pencil sketch colored, textured paper, high detailed, "
-    #"pencil sketch colored, visible strokes, high detailed, textured paper, "
-    #"Ultra-realistic, "
-    #"pencil sketch, colored pencil style, high detailed,  "
-    #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
-    #"film still, epic composition, highly detailed, masterpiece, "
-    #"shallow depth-of-field, 35 mm lens, biblical times, "
-    #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, photorealistic, no text overlay."
-    "ancient Middle-East setting, "
-    #"aspect_ratio=16:9, size=1024x574"
-    "wide"
+    "ancient Middle-East setting, wide"
 )
 
 # ─── session_state ─────────────────────────────
@@ -41,38 +31,38 @@ def agrupar_blocos(subs: List[pysrt.SubRipItem], min_w=20, max_w=30):
     blocos, txt, start = [], [], None
     for s in subs:
         words = s.text.replace("\n"," ").split()
-        if not words: continue
+        if not words:
+            continue
         start = start or s.start
         txt.extend(words)
         if len(txt) >= min_w:
             blocos.append({
-                "start": start, "end": s.end,
+                "start": start,
+                "end": s.end,
                 "text": " ".join(txt[:max_w])
             })
             txt, start = [], None
     if txt:
         blocos.append({
-            "start": start, "end": subs[-1].end,
+            "start": start,
+            "end": subs[-1].end,
             "text": " ".join(txt)
         })
     return blocos
 
+
 def clean_prompt(raw: str) -> str:
     parts = re.split(r"\*{0,2}Prompt\*{0,2}:\s*", raw)
-    body = parts[-1] if len(parts)>1 else raw
-    body = re.sub(r"^Here(?:'|’)s a [^:]+:\s*","", body)
-    body = body.replace("*","").strip()
+    body = parts[-1] if len(parts) > 1 else raw
+    body = re.sub(r"^Here(?:'|’)s a [^:]+:\s*", "", body)
+    body = body.replace("*", "").strip()
     return re.sub(r"\s+", " ", body)
+
 
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
-        #"Create a concise, vivid, ultra-realistic image generation prompt that represents "
         "Create a concise, vivid, image generation prompt, that represents "
-        "this scene, with no text overlay. " 
-        #"this biblical scene. " 
-        #"If it has a character, make a medium close-up. "
-        "The prompt must end with the quality parameters and explicitly "
-        #"keep 16:9 aspect ratio.\n\n"
+        "this scene, with no text overlay. "
         f"Scene:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
     )
@@ -88,6 +78,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     except Exception:
         pass
     return f"{texto}, {STYLE_SUFFIX}"
+
 
 def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
     for _ in range(tries):
@@ -119,21 +110,14 @@ if not api_key:
     st.error("Configure GEMINI_API_KEY em Settings ▸ Secrets.")
     st.stop()
 client_txt = genai.Client(api_key=api_key)
-client_img = genai.Client(
-    api_key=api_key, 
-    http_options=types.HttpOptions(api_version="v1alpha")
-)
+client_img = genai.Client(api_key=api_key, http_options=types.HttpOptions(api_version="v1alpha"))
 
 # Controles
 min_w = st.sidebar.number_input("Mín. palavras/bloco", 10, 30, 20)
 max_w = st.sidebar.number_input("Máx. palavras/bloco", 20, 60, 30)
 
-block_nums_str = st.sidebar.text_input(
-    "Blocos a (re)processar (índices, ex: 51,75):", ""
-)
-timestamps_str = st.sidebar.text_area(
-    "Timestamps a (re)processar (uma por linha, sem .png):", ""
-)
+block_nums_str = st.sidebar.text_input("Blocos a (re)processar (índices, ex: 51,75):", "")
+timestamps_str = st.sidebar.text_area("Timestamps a (re)processar (uma por linha, sem .png):", "")
 
 # Converte filtros
 selected_idxs = set()
@@ -146,16 +130,16 @@ selected_ts = {line.strip() for line in timestamps_str.splitlines() if line.stri
 
 uploaded = st.file_uploader("📂 Faça upload do .srt", type="srt")
 
-# ─── Botão: Gerar Imagens (com filtros) ───────
+# ─── Botão: Gerar Imagens ──────────────────────
 if st.button("🚀 Gerar Imagens"):
-    st.session_state["imgs"]   = []
+    st.session_state["imgs"] = []
     st.session_state["blocos"] = []
 
     if not uploaded:
         st.warning("Envie um .srt primeiro.")
         st.stop()
 
-    subs   = pysrt.from_string(uploaded.getvalue().decode("utf-8"))
+    subs = pysrt.from_string(uploaded.getvalue().decode("utf-8"))
     blocos = agrupar_blocos(subs, min_w, max_w)
     st.session_state["blocos"] = blocos
     st.info(f"{len(blocos)} blocos total; aplicando filtros...")
@@ -164,36 +148,35 @@ if st.button("🚀 Gerar Imagens"):
 
     for i, blk in enumerate(blocos, 1):
         key = f"{tag(blk['start'])}-{tag(blk['end'])}"
-        # aplica filtros
         if selected_idxs and i not in selected_idxs:
             continue
         if selected_ts and key not in selected_ts:
             continue
 
-        prompt    = gerar_prompt(client_txt, blk["text"])
+        prompt = gerar_prompt(client_txt, blk["text"])
         img_bytes = gerar_imagem(client_img, prompt)
         if img_bytes is None:
             st.warning(f"⚠️ Bloco {i} ({key}): sem imagem, pulado.")
             prog.progress(i/len(blocos))
             continue
 
-        fname = f"{key}.png"
+        # Inclui número do bloco no nome do arquivo
+        fname = f"{key}_B{i}.png"
         (out_dir/fname).write_bytes(img_bytes)
-        st.session_state["imgs"].append({"name":fname,"bytes":img_bytes,"prompt":prompt})
+        st.session_state["imgs"].append({"name": fname, "bytes": img_bytes, "prompt": prompt})
         prog.progress(i/len(blocos))
 
     st.success("✔️ Processamento concluído!")
 
-# ─── Botão: Reprocessar falhas ────────────────
+# ─── Botão: Reprocessar falhas ─────────────────
 if st.session_state["blocos"] and st.button("🔄 Reprocessar falhas"):
     prog = st.progress(0.0)
     total = len(st.session_state["blocos"])
     for i, blk in enumerate(st.session_state["blocos"], 1):
         key = f"{tag(blk['start'])}-{tag(blk['end'])}"
-        # pula se já gerada
-        if any(item["name"] == f"{key}.png" for item in st.session_state["imgs"]):
+        # Verifica se já existe com sufixo de bloco
+        if any(item["name"] == f"{key}_B{i}.png" for item in st.session_state["imgs"]):
             continue
-        # aplica filtros
         if selected_idxs and i not in selected_idxs:
             continue
         if selected_ts and key not in selected_ts:
@@ -202,8 +185,8 @@ if st.session_state["blocos"] and st.button("🔄 Reprocessar falhas"):
         prompt = gerar_prompt(client_txt, blk["text"])
         img_bytes = gerar_imagem(client_img, prompt)
         if img_bytes:
-            fname = f"{key}.png"
-            st.session_state["imgs"].append({"name":fname,"bytes":img_bytes,"prompt":prompt})
+            fname = f"{key}_B{i}.png"
+            st.session_state["imgs"].append({"name": fname, "bytes": img_bytes, "prompt": prompt})
         prog.progress(i/total)
     st.success("🔄 Reprocessamento concluído!")
 
@@ -222,18 +205,16 @@ if st.session_state["imgs"]:
 
     # ZIP on-the-fly
     buf = io.BytesIO()
-    with zipfile.ZipFile(buf,"w",zipfile.ZIP_DEFLATED) as zf:
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for itm in st.session_state["imgs"]:
             zf.writestr(itm["name"], itm["bytes"])
     buf.seek(0)
     st.download_button(
-        "⬇️ Baixar todas as imagens (.zip)",
-        buf, "todas_as_imagens.zip", "application/zip"
+        "⬇️ Baixar todas as imagens (.zip)", buf, "todas_as_imagens.zip", "application/zip"
     )
 
     # Prompts.txt
     txt = "\n\n".join(f"{itm['name']}: {itm['prompt']}" for itm in st.session_state["imgs"])
     st.download_button(
-        "⬇️ Baixar Prompts (.txt)",
-        txt, "prompts.txt", "text/plain"
+        "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
