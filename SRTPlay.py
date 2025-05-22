@@ -13,16 +13,18 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "pencil sketch colored, textured paper, high detailed"
+    "pencil sketch colored, high detailed, "
+    #"pencil sketch colored, textured paper, high detailed, "
     #"pencil sketch colored, visible strokes, high detailed, textured paper, "
     #"Ultra-realistic, "
     #"pencil sketch, colored pencil style, high detailed,  "
-        #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
+    #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     #"film still, epic composition, highly detailed, masterpiece, "
     #"shallow depth-of-field, 35 mm lens, biblical times, "
     #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, photorealistic, no text overlay."
-    #"ancient Middle-East setting, aspect ratio: 16:9, 1024x574, no text overlay."
-    "aspect_ratio=16:9, size=1024x574"
+    "ancient Middle-East setting, "
+    #"aspect_ratio=16:9, size=1024x574"
+    "wide"
 )
 
 # ─── session_state ─────────────────────────────
@@ -70,7 +72,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         #"this biblical scene. " 
         #"If it has a character, make a medium close-up. "
         "The prompt must end with the quality parameters and explicitly "
-        "keep 16:9 aspect ratio.\n\n"
+        #"keep 16:9 aspect ratio.\n\n"
         f"Scene:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
     )
