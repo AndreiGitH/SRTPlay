@@ -13,7 +13,7 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "pencil colored, high detailed, black background, surrealistic, "
+    "pencil colored, high detailed, black background, realistic, "
     "ancient Middle-East setting, wide, "
     "aspect_ratio=16:9, size=1024x574."
     #"pencil sketch colored, textured paper, high detailed, "
