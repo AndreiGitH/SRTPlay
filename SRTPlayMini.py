@@ -27,8 +27,8 @@ STYLE_SUFFIX = (
     #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     #"film still, epic composition, highly detailed, 4K HDR, masterpiece, "
     #"shallow depth-of-field, 35 mm lens, photorealistic, biblical times, "
-    #"Pencil colored, black background, "
-    "Ultra-realistic, "
+    "Pencil colored, black background, "
+    #"Ultra-realistic, "
     "ancient Middle-East setting, no text overlay."
 )
 
