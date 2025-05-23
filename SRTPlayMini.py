@@ -27,7 +27,7 @@ STYLE_SUFFIX = (
     #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
     #"film still, epic composition, highly detailed, 4K HDR, masterpiece, "
     #"shallow depth-of-field, 35 mm lens, photorealistic, biblical times, "
-    "Pencil colored, black background, "
+    "Pencil style, black background, "
     #"Ultra-realistic, "
     "ancient Middle-East setting, no text overlay."
 )
@@ -66,7 +66,7 @@ def clean_prompt(raw: str) -> str:
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         "Create a concise, vivid, image generation prompt that represents "
-        "this biblical scene. The prompt must end with the quality parameters."
+        "this biblical scene. The prompt must end with the quality parameters, and only one part of image in red color."
         " \n\n"
         f"Scene:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
