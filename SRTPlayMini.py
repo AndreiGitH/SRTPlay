@@ -83,8 +83,8 @@ def gerar_prompt(client_txt, texto: str) -> str:
 
 def gerar_imagem_replicate(prompt: str, aspect_ratio: str="16:9") -> bytes:
     #output = replicate.run("black-forest-labs/flux-dev", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
-    output = replicate.run("google/imagen-3-fast", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "safety_filter_level": "block_only_high"})
-    #output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
+    #output = replicate.run("google/imagen-3-fast", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "safety_filter_level": "block_only_high"})
+    output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
     return output[0].read()
 
 # ─── Streamlit UI ───────────────────────────────
