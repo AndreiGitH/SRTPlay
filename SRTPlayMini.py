@@ -61,7 +61,7 @@ def clean_prompt(raw: str) -> str:
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         "Create a concise, vivid, image generation prompt that represents "
-        "this biblical scene. The prompt must end with the quality parameters, and only one part of image in red color."
+        "this biblical scene. The prompt must end with the quality parameters, and only one part of image in blue, red ou yellow color."
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
