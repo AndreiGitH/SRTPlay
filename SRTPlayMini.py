@@ -25,7 +25,7 @@ from google.genai import types
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     #"Pencil style, black background, ancient Middle-East setting, no text overlay."
-    "Biblical times, Cinematic and ultra-realistic, no text overlay."
+    "Cinematic and ultra-realistic, high deteiled, no text overlay."
 )
 # ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
