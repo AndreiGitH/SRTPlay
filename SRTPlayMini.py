@@ -22,6 +22,8 @@ from io import BytesIO
 import google.genai as genai
 from google.genai import types
 
+import time
+
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     "Pencil style, black background, ancient Middle-East setting, no text overlay."
@@ -67,6 +69,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
+         time.sleep(6) # espera 6 segundos
         resp = client_txt.models.generate_content(model="gemini-2.5-flash-preview-05-20", contents=pedido)
         raw = resp.candidates[0].content.parts[0].text or ""
         prompt = clean_prompt(raw)
