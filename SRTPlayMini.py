@@ -67,7 +67,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
-        resp = client_txt.models.generate_content(model="gemini-2.0-flash", contents=pedido)
+        resp = client_txt.models.generate_content(model="gemini-2.5-flash-preview-05-20", contents=pedido)
         raw = resp.candidates[0].content.parts[0].text or ""
         prompt = clean_prompt(raw)
         if prompt and not prompt.startswith(texto[:10]):
