@@ -26,7 +26,7 @@ import time
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "Pencil style, black background, ancient Middle-East setting, no text overlay."
+    "D.C. Comics, black background, ancient Middle-East setting, no text overlay."
     #"Cinematic and ultra-realistic, high deteiled, no text overlay."
 )
 # ─── session_state ─────────────────────────────
