@@ -69,7 +69,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
-         time.sleep(5) # espera 5 segundos RPM de 10 para o modelo 2.5 flash e 15 para o 2.0 flash
+        time.sleep(5) # espera 5 segundos RPM de 10 para o modelo 2.5 flash e 15 para o 2.0 flash
         resp = client_txt.models.generate_content(model="gemini-2.5-flash-preview-05-20", contents=pedido)
         raw = resp.candidates[0].content.parts[0].text or ""
         prompt = clean_prompt(raw)
