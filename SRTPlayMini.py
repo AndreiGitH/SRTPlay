@@ -24,8 +24,8 @@ from google.genai import types
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    #"Pencil style, black background, ancient Middle-East setting, no text overlay."
-    "Cinematic and ultra-realistic, high deteiled, no text overlay."
+    "Pencil style, black background, ancient Middle-East setting, no text overlay."
+    #"Cinematic and ultra-realistic, high deteiled, no text overlay."
 )
 # ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
@@ -62,8 +62,8 @@ def clean_prompt(raw: str) -> str:
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         "Create a concise, vivid, image generation prompt that represents "
-        "this biblical scene. Always bring a biblical setting, an environment of the time. The prompt must end with the quality parameters. "
-        #"this biblical scene. The prompt must end with the quality parameters, and only one part of image in blue, red ou yellow color."
+        #"this biblical scene. Always bring a biblical setting, an environment of the time. The prompt must end with the quality parameters. "
+        "this biblical scene. The prompt must end with the quality parameters, and only one part of image in blue, red ou yellow color."
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
