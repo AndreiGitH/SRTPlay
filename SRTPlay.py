@@ -13,8 +13,9 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "pencil sketch, colored, high detailed, black background, realistic, "
-    "ancient Middle-East setting, wide, "
+    "abstract, black background, "
+    #"pencil sketch, colored, high detailed, black background, realistic, "
+    #"ancient Middle-East setting, wide, "
     "aspect_ratio=16:9, size=1024x574."
     #"pencil sketch colored, textured paper, high detailed, "
     #"pencil sketch colored, visible strokes, high detailed, textured paper, "
@@ -69,10 +70,13 @@ def clean_prompt(raw: str) -> str:
 
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
-        "Create a concise, vivid, image generation prompt, that represents "
-        "this scene, with no text overlay. "
+        #"Create a concise, vivid, image generation prompt, that represents "
+        #"this scene, with no text overlay. "
+        "Create a concise image generation prompt, that represents "
+        "these words. "
         "The prompt must end with the quality parameters and explicitly "
-        f"Scene:\n{texto}\n\n"
+        #f"Scene:\n{texto}\n\n"
+        f"Words:\n{texto}\n\n"
         f"Quality parameters:\n{STYLE_SUFFIX}"
     )
     try:
