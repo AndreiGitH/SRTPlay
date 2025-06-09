@@ -72,21 +72,21 @@ def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         #"Create a concise, vivid, image generation prompt, that represents "
         #"this scene, with no text overlay. "
-        "Create an abstract icon or symbol with black background, that represents "
-        "this text: "
+        "Create an abstract a concise image generation prompt with black background, that represents "
+        "the principal words of this text (subject verb predicate): "
         #"The prompt must end with the quality parameters and explicitly "
         #f"Scene:\n{texto}\n\n"
         f"{texto}" + " aspect_ratio=16:9."
         #f"Quality parameters:\n{STYLE_SUFFIX}"
     )
     try:
-    #    resp = client_txt.models.generate_content(
-     #       model="gemini-2.0-flash",
-      #      contents=pedido
-        #)
-        #raw = resp.candidates[0].content.parts[0].text or ""
-        #prompt = clean_prompt(raw)
-        prompt = pedido
+        resp = client_txt.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=pedido
+        )
+        raw = resp.candidates[0].content.parts[0].text or ""
+        prompt = clean_prompt(raw)
+        #prompt = pedido
         if prompt and not prompt.startswith(texto[:10]):
             return prompt
     except Exception:
