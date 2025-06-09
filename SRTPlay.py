@@ -72,12 +72,12 @@ def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         #"Create a concise, vivid, image generation prompt, that represents "
         #"this scene, with no text overlay. "
-        "Create an abstract and concise image generation prompt (only one option ready to go in english) with black background, that represents "
+        "Create an abstract and concise image generation prompt (only one option ready to go in english), that represents "
         "the principal words of this text (subject verb predicate): "
         #"The prompt must end with the quality parameters and explicitly "
         #f"Scene:\n{texto}\n\n"
-        f"{texto}" + " aspect_ratio=16:9."
-        #f"Quality parameters:\n{STYLE_SUFFIX}"
+        f"{texto}"
+        f". Quality parameters:{STYLE_SUFFIX}"
     )
     try:
         resp = client_txt.models.generate_content(
