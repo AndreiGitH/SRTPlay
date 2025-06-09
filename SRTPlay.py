@@ -81,7 +81,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     )
     try:
         resp = client_txt.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash-preview-04-17",
             contents=pedido
         )
         raw = resp.candidates[0].content.parts[0].text or ""
