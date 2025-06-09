@@ -77,7 +77,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         #"The prompt must end with the quality parameters and explicitly "
         #f"Scene:\n{texto}\n\n"
         f"{texto}"
-        f". Quality parameters:{STYLE_SUFFIX}"
+        f". Style parameters:{STYLE_SUFFIX}"
     )
     try:
         resp = client_txt.models.generate_content(
