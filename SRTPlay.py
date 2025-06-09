@@ -72,7 +72,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
         #"Create a concise, vivid, image generation prompt, that represents "
         #"this scene, with no text overlay. "
-        "Create an abstract image with black background, that gives a meaning to "
+        "Create an abstract image with black background, that represents "
         "these phrase: "
         #"The prompt must end with the quality parameters and explicitly "
         #f"Scene:\n{texto}\n\n"
