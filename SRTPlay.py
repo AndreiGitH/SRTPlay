@@ -13,7 +13,7 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "icon style, black background, "
+    "vetor style, black background, "
     #"pencil sketch, colored, high detailed, black background, realistic, "
     #"ancient Middle-East setting, wide, "
     "aspect_ratio=16:9, wide."
