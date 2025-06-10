@@ -98,7 +98,8 @@ def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
     for _ in range(tries):
         try:
             resp = client_img.models.generate_content(
-                model="gemini-2.0-flash-exp-image-generation",
+                #model="gemini-2.0-flash-exp-image-generation",
+                model="gemini-2.0-flash-preview-image-generation",
                 contents=[prompt],
                 config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             )
