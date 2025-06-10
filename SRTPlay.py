@@ -13,17 +13,18 @@ from io import BytesIO
 
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
-    "vector style, black background, "
+    #"vector style, black background, "
     #"pencil sketch, colored, high detailed, black background, realistic, "
-    #"ancient Middle-East setting, wide, "
-    "aspect_ratio=16:9, wide."
+    #"ancient Middle-East setting,"
+    #"aspect_ratio=16:9, wide."
     #"pencil sketch colored, textured paper, high detailed, "
     #"pencil sketch colored, visible strokes, high detailed, textured paper, "
-    #"Ultra-realistic, "
+    #"Ultra-realistic, photorealistic"
     #"pencil sketch, colored pencil style, high detailed,  "
-    #"Ultra-realistic, cinematic lighting, volumetric light, dramatic contrast, "
-    #"film still, epic composition, highly detailed, masterpiece, "
-    #"shallow depth-of-field, 35 mm lens, biblical times, "
+    "Ultra-realistic, photorealistic, cinematic lighting, volumetric light, dramatic contrast, "
+    "film still, epic composition, highly detailed, masterpiece, "
+    "shallow depth-of-field, 35 mm lens,"
+    "ancient Middle-East setting, biblical times."
 )
 
 # ─── session_state ─────────────────────────────
@@ -70,14 +71,14 @@ def clean_prompt(raw: str) -> str:
 
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
-        #"Create a concise, vivid, image generation prompt, that represents "
-        #"this scene, with no text overlay. "
-        "Create an concise image generation prompt (only one option ready to go in english), that represents "
-        "the principal words of this text (subject verb predicate): "
+        "Create a concise, vivid, image generation prompt, that represents "
+        "this scene, with no text overlay. "
+        #"Create an concise image generation prompt (only one option ready to go in english), that represents "
+        #"the principal words of this text (subject verb predicate): "
         #"The prompt must end with the quality parameters and explicitly "
-        #f"Scene:\n{texto}\n\n"
-        f"{texto}"
-        f". Style parameters:{STYLE_SUFFIX}"
+        f"Scene:\n{texto}\n\n"
+        #f"{texto}"
+        f". Style parameters:{STYLE_SUFFIX}."
     )
     try:
         resp = client_txt.models.generate_content(
