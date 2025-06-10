@@ -16,7 +16,7 @@ STYLE_SUFFIX = (
     "icon style, black background, "
     #"pencil sketch, colored, high detailed, black background, realistic, "
     #"ancient Middle-East setting, wide, "
-    "aspect_ratio=16:9, size=1024x574."
+    "aspect_ratio=16:9, wide."
     #"pencil sketch colored, textured paper, high detailed, "
     #"pencil sketch colored, visible strokes, high detailed, textured paper, "
     #"Ultra-realistic, "
