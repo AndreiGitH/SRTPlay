@@ -83,7 +83,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     return f"{texto}, {STYLE_SUFFIX}"
 
 def gerar_imagem_replicate(prompt: str, aspect_ratio: str="16:9") -> bytes:
-    output = replicate.run("black-forest-labs/flux-schnell", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "go_fast": False}) 
+    output = replicate.run("black-forest-labs/flux-schnell", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "disable_safety_checker": True, "go_fast": False}) 
     #output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
     return output[0].read()
 
