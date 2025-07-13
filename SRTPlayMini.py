@@ -27,8 +27,8 @@ import time
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
-    #"Cinematic and Photorealistic, high detailed, no text overlay."
-    "vector, minimalistic, no text overlay." 
+    "Cinematic and Photorealistic, high detailed, no text overlay."
+    #"vector, minimalistic, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
@@ -68,8 +68,8 @@ def gerar_prompt(client_txt, texto: str) -> str:
         #"this biblical scene. Always bring a biblical setting, an environment of the time. The prompt must end with the quality parameters. "
         #"this biblical scene, with a beautiful ancient Middle Eastern setting. Capture the character emotion. The prompt must end with the quality parameters." # and only one part of image in blue, red ou yellow color.
         #"This biblical scene, set against a beautiful ancient Middle Eastern backdrop. Capture the emotion of the character or simply the beauty of the historical setting. The prompt should end with the quality parameters."
-        #"This biblical scene, that bring emotion and a beautiful look, bright and sharpness, set against a beautiful ancient Middle Eastern backdrop. Face emotion when if necessary. The prompt should end with the quality parameters."
-        "This scene with no text. The prompt should end with the quality parameters."
+        "This biblical scene, that bring emotion and a beautiful look, bright and sharpness, golden light, set against a beautiful ancient Middle Eastern backdrop. The prompt should end with the quality parameters."
+        #"This scene with no text. The prompt should end with the quality parameters."
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
@@ -84,7 +84,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         pass
     return f"{texto}, {STYLE_SUFFIX}"
 
-def gerar_imagem_replicate(prompt: str, aspect_ratio: str="1:1") -> bytes:
+def gerar_imagem_replicate(prompt: str, aspect_ratio: str="16:9") -> bytes:
     output = replicate.run("black-forest-labs/flux-schnell", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "disable_safety_checker": True, "go_fast": False}) 
     #output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
     return output[0].read()
