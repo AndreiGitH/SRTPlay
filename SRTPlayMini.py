@@ -99,7 +99,7 @@ if not rep_token:
     st.error("Defina REPLICATE_API_TOKEN em Settings → Secrets.")
     st.stop()
 os.environ["REPLICATE_API_TOKEN"] = rep_token
-api_key = st.secrets.get("GEMINI_API_KEY","")
+api_key = st.secrets.get("GEMINI_API_KEY2","")
 client_txt = genai.Client(api_key=api_key) if api_key else None
 
 # Controles de bloco
