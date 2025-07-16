@@ -28,7 +28,7 @@ import time
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
     #"Cinematic and Photorealistic, high detailed, no text overlay."
-    "vector, no text overlay." 
+    #"vector, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
@@ -84,7 +84,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         pass
     return f"{texto}, {STYLE_SUFFIX}"
 
-def gerar_imagem_replicate(prompt: str, aspect_ratio: str="1:1") -> bytes:
+def gerar_imagem_replicate(prompt: str, aspect_ratio: str="16:9") -> bytes:
     output = replicate.run("black-forest-labs/flux-schnell", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "disable_safety_checker": True, "go_fast": False}) 
     #output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
     return output[0].read()
