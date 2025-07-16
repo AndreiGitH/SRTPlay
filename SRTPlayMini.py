@@ -27,7 +27,7 @@ import time
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
-    #"Cinematic and Photorealistic, high detailed, no text overlay."
+    "Cinematic and Photorealistic, high detailed, no text overlay."
     #"vector, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
@@ -177,7 +177,7 @@ if st.session_state["imgs"]:
         for item in st.session_state["imgs"]:
             zf.writestr(item["name"], item["bytes"])
     buf.seek(0)
-    st.download_button("⬇️ Baixar ZIP (.zip)", buf, "all_images.zip", "application/zip")
+    st.download_button("⬇️ Baixar ZIP (.zip)", buf, "output_images.zip", "application/zip")
 
     txt = "\n\n".join(f"{itm['name']}: {itm['prompt']}" for itm in st.session_state["imgs"])
     st.download_button("⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain")
