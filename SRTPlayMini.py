@@ -74,8 +74,8 @@ def gerar_prompt(client_txt, texto: str) -> str:
     )
     try:
         time.sleep(3) # espera 3 segundos RPM de 10 para o modelo 2.5 flash e 15 para o 2.0 flash
-        #resp = client_txt.models.generate_content(model="gemini-2.0-flash", contents=pedido) gemini-2.5-flash-preview-05-2
-        resp = client_txt.models.generate_content(model="gemini-2.5-flash-lite-preview-06-17", contents=pedido)
+        resp = client_txt.models.generate_content(model="gemini-2.0-flash", contents=pedido) gemini-2.5-flash-preview-05-2
+        #resp = client_txt.models.generate_content(model="gemini-2.5-flash-lite-preview-06-17", contents=pedido)
         raw = resp.candidates[0].content.parts[0].text or ""
         prompt = clean_prompt(raw)
         if prompt and not prompt.startswith(texto[:10]):
