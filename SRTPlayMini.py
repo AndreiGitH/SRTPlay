@@ -27,8 +27,8 @@ import time
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
-    #"Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
-    "pixar 3D, high detailed, no text overlay." 
+    "Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
+    #"pixar 3D, high detailed, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
@@ -73,7 +73,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
-        time.sleep(3) # espera 3 segundos RPM de 10 para o modelo 2.5 flash e 15 para o 2.0 flash
+        time.sleep(2) # espera 3 segundos RPM de 10 para o modelo 2.5 flash e 15 para o 2.0 flash
         #resp = client_txt.models.generate_content(model="gemini-2.5-flash-preview-05-2", contents=pedido) # gemini-2.0-flash
         resp = client_txt.models.generate_content(model="gemini-2.5-flash-lite-preview-06-17", contents=pedido)
         raw = resp.candidates[0].content.parts[0].text or ""
@@ -84,7 +84,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         pass
     return f"{texto}, {STYLE_SUFFIX}"
 
-def gerar_imagem_replicate(prompt: str, aspect_ratio: str="1:1") -> bytes:
+def gerar_imagem_replicate(prompt: str, aspect_ratio: str="16:9") -> bytes:
     output = replicate.run("prunaai/flux.1-dev:970a966e3a5d8aa9a4bf13d395cf49c975dc4726e359f982fb833f9b100f75d5", input={"seed": -1, "prompt": prompt, "guidance": 3.5, "image_size": 1024, "speed_mode": "Lightly Juiced 🍊 (more consistent)", "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "num_inference_steps": 30})
     #output = replicate.run("black-forest-labs/flux-schnell", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "disable_safety_checker": True, "go_fast": False}) 
     #output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
