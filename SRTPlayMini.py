@@ -28,7 +28,7 @@ import time
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
     #"Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
-    "old cartoon style, high detailed, no text overlay." 
+    "HQ, high detailed, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
