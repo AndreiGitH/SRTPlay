@@ -27,8 +27,8 @@ import time
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
-    "Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
-    #"pixar 3D, high detailed, no text overlay." 
+    #"Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
+    "D.C. Comics, high detailed, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
 if "imgs" not in st.session_state:
@@ -68,8 +68,8 @@ def gerar_prompt(client_txt, texto: str) -> str:
         #"this biblical scene. Always bring a biblical setting, an environment of the time. The prompt must end with the quality parameters. "
         #"this biblical scene, with a beautiful ancient Middle Eastern setting. Capture the character emotion. The prompt must end with the quality parameters." # and only one part of image in blue, red ou yellow color.
         #"This biblical scene, set against a beautiful ancient Middle Eastern backdrop. Capture the emotion of the character or simply the beauty of the historical setting. The prompt should end with the quality parameters."
-        "This biblical scene, sharpness, set against a beautiful ancient Middle Eastern backdrop. The prompt should end with the quality parameters."
-        #"This scene with no text. The prompt should end with the quality parameters."
+        #"This biblical scene, sharpness, set against a beautiful ancient Middle Eastern backdrop. The prompt should end with the quality parameters."
+        "This scene with no text, in the context of image for seniors. The prompt should end with the quality parameters."
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
