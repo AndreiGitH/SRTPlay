@@ -68,7 +68,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
         #"this biblical scene. Always bring a biblical setting, an environment of the time. The prompt must end with the quality parameters. "
         #"this biblical scene, with a beautiful ancient Middle Eastern setting. Capture the character emotion. The prompt must end with the quality parameters." # and only one part of image in blue, red ou yellow color.
         #"This biblical scene, set against a beautiful ancient Middle Eastern backdrop. Capture the emotion of the character or simply the beauty of the historical setting. The prompt should end with the quality parameters."
-        "This biblical scene, sharpness, set against a beautiful ancient Middle Eastern backdrop. When you need characters: The male character is 35 years old (has a beard and mustache) and the female character is 30 years old. She is very beautiful and has black hair. The prompt should end with the quality parameters."
+        "This biblical scene (biblical times), sharpness, set against a beautiful ancient Middle Eastern backdrop. When you need characters: The male character is 35 years old (has a beard and mustache) and the female character is 30 years old. She is very beautiful and has black hair. The prompt should end with the quality parameters."
         #"This scene with no text, in the context of image for seniors. The prompt should end with the quality parameters."
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
