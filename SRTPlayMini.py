@@ -28,7 +28,7 @@ import time
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
     #"Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
-    "dark gothic atmosphere, dramatic shadows, deep reds and browns, cinematic high contrast, 4K detail, photorealistic"
+    "dark gothic atmosphere, dramatic shadows, deep reds and browns, cinematic high contrast, 4K detail, photorealistic, photography"
     #"high detailed, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
