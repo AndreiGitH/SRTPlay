@@ -27,7 +27,8 @@ import time
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
-    "Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
+    #"Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
+    "dark gothic atmosphere, dramatic shadows, deep reds and browns, cinematic high contrast, 4K detail, photorealistic"
     #"high detailed, no text overlay." 
 )
 # ─── session_state ─────────────────────────────
@@ -69,7 +70,8 @@ def gerar_prompt(client_txt, texto: str) -> str:
         #"this biblical scene, with a beautiful ancient Middle Eastern setting. Capture the character emotion. The prompt must end with the quality parameters." # and only one part of image in blue, red ou yellow color.
         #"This biblical scene, set against a beautiful ancient Middle Eastern backdrop. Capture the emotion of the character or simply the beauty of the historical setting. The prompt should end with the quality parameters."
         #This biblical scene (biblical times), sharpness, set against a beautiful ancient Middle Eastern backdrop. If there is a man in the scene, he should be: 35 years old (has a beard and mustache). If there is a woman in the scene, she should be: 30 years old and is very beautiful and has black hair. The prompt should end with the quality parameters."
-        "This scene with no text, no hands, in the context of image for seniors. The prompt should end with the quality parameters."
+        #"This scene with no text, no hands, in the context of image for seniors. The prompt should end with the quality parameters."
+        "This scene with no text. The prompt should end with the quality parameters."
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
@@ -86,10 +88,10 @@ def gerar_prompt(client_txt, texto: str) -> str:
 
 def gerar_imagem_replicate(prompt: str, aspect_ratio: str="16:9") -> bytes:
     #output = replicate.run("prunaai/flux.1-dev:970a966e3a5d8aa9a4bf13d395cf49c975dc4726e359f982fb833f9b100f75d5", input={"seed": -1, "prompt": prompt, "guidance": 3.5, "image_size": 1024, "speed_mode": "Juiced 🔥 (default)", "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "num_inference_steps": 30})
-    output = replicate.run("black-forest-labs/flux-schnell", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "disable_safety_checker": True, "go_fast": False}) 
-    #output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
-    return output[0].read()
-    #return output.read()
+    #output = replicate.run("black-forest-labs/flux-schnell", input={"prompt": prompt, "aspect_ratio": aspect_ratio, "output_format": "png", "output_quality": 100, "disable_safety_checker": True, "go_fast": False}) 
+    output = replicate.run("minimax/image-01", input={"prompt": prompt, "aspect_ratio": aspect_ratio})
+    #return output[0].read()
+    return output.read()
 
 # ─── Streamlit UI ───────────────────────────────
 st.set_page_config(page_title="SRT ▶︎ Replicate Imagens", layout="wide")
