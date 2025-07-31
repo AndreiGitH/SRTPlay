@@ -27,7 +27,8 @@ import time
 # ─── Configurações ─────────────────────────────
 STYLE_SUFFIX = (
     #"D.C. Comics, black background, ancient Middle-East setting, no text overlay."
-    "Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
+    #"Cinematic and Photorealistic, Photography high detailed, 4k, no text overlay."
+    "Cinematic and Photorealistic, Photography high detailed, 4k, Chiaroscuro, no text overlay."
     #"dark gothic atmosphere, dramatic shadows, deep reds and browns, cinematic high contrast, 4K detail, photorealistic, photography"
     #"high detailed, no text overlay." 
 )
@@ -70,8 +71,8 @@ def gerar_prompt(client_txt, texto: str) -> str:
         #"this biblical scene, with a beautiful ancient Middle Eastern setting. Capture the character emotion. The prompt must end with the quality parameters." # and only one part of image in blue, red ou yellow color.
         #"This biblical scene, set against a beautiful ancient Middle Eastern backdrop. Capture the emotion of the character or simply the beauty of the historical setting. The prompt should end with the quality parameters."
         #This biblical scene (biblical times), sharpness, set against a beautiful ancient Middle Eastern backdrop. If there is a man in the scene, he should be: 35 years old (has a beard and mustache). If there is a woman in the scene, she should be: 30 years old and is very beautiful and has black hair. The prompt should end with the quality parameters."
-        "This scene with no text, no hands, in the context of image for seniors. The prompt should end with the quality parameters."
-        #"This scene with no text. The prompt should end with the quality parameters."
+        #"This scene with no text, no hands, in the context of image for seniors. The prompt should end with the quality parameters."
+        "This scene with no text. The prompt should end with the quality parameters."
         f"\n\nScene:\n{texto}\n\nQuality parameters:\n{STYLE_SUFFIX}"
     )
     try:
@@ -107,8 +108,8 @@ api_key = st.secrets.get("GEMINI_API_KEY2","")
 client_txt = genai.Client(api_key=api_key) if api_key else None
 
 # Controles de bloco
-min_w = st.sidebar.number_input("Mín. palavras/bloco", 10, 30, 20)
-max_w = st.sidebar.number_input("Máx. palavras/bloco", 20, 60, 30)
+min_w = st.sidebar.number_input("Mín. palavras/bloco", 10, 100, 20)
+max_w = st.sidebar.number_input("Máx. palavras/bloco", 20, 150, 30)
 block_nums_str = st.sidebar.text_input("Blocos a (re)processar (índices, ex: 51,75):", "")
 timestamps_str = st.sidebar.text_area("Timestamps a (re)processar (uma por linha, sem .png):", "")
 selected_idxs = set()
