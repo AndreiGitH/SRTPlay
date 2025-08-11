@@ -24,7 +24,7 @@ STYLE_SUFFIX = (
     "Ultra-realistic, photorealistic, cinematic lighting, volumetric light, dramatic contrast, "
     "film still, epic composition, highly detailed, masterpiece, "
     "shallow depth-of-field, 35 mm lens,"
-    "ancient Middle-East setting, biblical times."
+    #"ancient Middle-East setting, biblical times."
 )
 
 # ─── session_state ─────────────────────────────
@@ -234,3 +234,4 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
