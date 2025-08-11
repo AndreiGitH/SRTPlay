@@ -23,7 +23,7 @@ STYLE_SUFFIX = (
     #"pencil sketch, colored pencil style, high detailed,  "
     "Ultra-realistic, photorealistic, cinematic lighting, volumetric light, dramatic contrast, "
     "film still, epic composition, highly detailed, masterpiece, "
-    "shallow depth-of-field, 35 mm lens,"
+    "shallow depth-of-field, 35 mm lens, no text overlay"
     #"ancient Middle-East setting, biblical times."
 )
 
@@ -71,7 +71,7 @@ def clean_prompt(raw: str) -> str:
 
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
-        "Create a concise, vivid, image generation prompt, that represents "
+        "Create a vivid, image generation prompt, that represents "
         "this scene, with no text overlay. "
         #"Create an concise image generation prompt (only one option ready to go in english), that represents "
         #"the principal words of this text (subject verb predicate): "
@@ -234,4 +234,5 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
