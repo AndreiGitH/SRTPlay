@@ -226,7 +226,7 @@ if st.session_state["imgs"]:
             zf.writestr(itm["name"], itm["bytes"])
     buf.seek(0)
     st.download_button(
-        "⬇️ Baixar todas as imagens (.zip)", buf, "todas_as_imagens.zip", "application/zip"
+        "⬇️ Baixar todas as imagens (.zip)", buf, "output_imagens.zip", "application/zip"
     )
 
     # Prompts.txt
@@ -234,5 +234,6 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
