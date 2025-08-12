@@ -16,7 +16,7 @@ STYLE_SUFFIX = (
     #"vector style, black background, "
     #"pencil sketch, colored, high detailed, black background, realistic, "
     #"ancient Middle-East setting,"
-    #"aspect_ratio=16:9, wide."
+    "aspect_ratio=16:9, wide."
     #"pencil sketch colored, textured paper, high detailed, "
     #"pencil sketch colored, visible strokes, high detailed, textured paper, "
     #"Ultra-realistic, photorealistic"
@@ -234,6 +234,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
