@@ -105,7 +105,7 @@ def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
                 config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             )
         except Exception:
-            time.sleep(2.0)
+            time.sleep(1.0)
             continue
         if resp and resp.candidates:
             cand0 = resp.candidates[0]
@@ -234,6 +234,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
