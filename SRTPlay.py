@@ -22,7 +22,7 @@ STYLE_SUFFIX = (
     #"Ultra-realistic, photorealistic"
     #"pencil sketch, colored pencil style, high detailed,  "
     "Ultra-realistic, photorealistic, cinematic lighting, volumetric light, dramatic contrast, "
-    "film still, epic composition, highly detailed, masterpiece, "
+    #"film still, epic composition, highly detailed, masterpiece, "
     "shallow depth-of-field, 35 mm lens, no text overlay, aspect_ratio=16:9, wide."
     #"ancient Middle-East setting, biblical times."
 )
@@ -234,6 +234,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
