@@ -72,7 +72,7 @@ def clean_prompt(raw: str) -> str:
 
 def gerar_prompt(client_txt, texto: str) -> str:
     pedido = (
-        "Create a vivid, image generation prompt, that represents "
+        "Create a vivid, concise, image generation prompt, that represents "
         "this scene, no text overlay. "
         #"Create an concise image generation prompt (only one option ready to go in english), that represents "
         #"the principal words of this text (subject verb predicate): "
@@ -235,6 +235,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
