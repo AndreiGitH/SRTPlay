@@ -22,6 +22,7 @@ STYLE_SUFFIX = (
     #"Ultra-realistic, photorealistic"
     #"pencil sketch, colored pencil style, high detailed,  "
     "Ultra-realistic, photorealistic, cinematic lighting, volumetric light, dramatic contrast, "
+    "Ultra-realistic, photorealistic,chiaoscuro, dramatic contrast, "
     #"film still, epic composition, highly detailed, masterpiece, "
     "shallow depth-of-field, 35 mm lens, no text overlay, aspect_ratio=16:9, wide."
     #"ancient Middle-East setting, biblical times."
@@ -82,7 +83,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     )
     try:
         resp = client_txt.models.generate_content(
-            model="gemini-2.5-flash-preview-04-17",
+            model="gemini-2.5-flash-lite",
             contents=pedido
         )
         raw = resp.candidates[0].content.parts[0].text or ""
@@ -95,7 +96,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     return f"{texto}, {STYLE_SUFFIX}"
 
 
-def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
+def gerar_imagem(client_img, prompt: str, tries: int = 20) -> bytes | None:
     for _ in range(tries):
         try:
             resp = client_img.models.generate_content(
@@ -105,7 +106,7 @@ def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
                 config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             )
         except Exception:
-            time.sleep(1.0)
+            time.sleep(2.0)
             continue
         if resp and resp.candidates:
             cand0 = resp.candidates[0]
@@ -113,7 +114,7 @@ def gerar_imagem(client_img, prompt: str, tries: int = 50) -> bytes | None:
                 for part in cand0.content.parts:
                     if part.inline_data:
                         return part.inline_data.data
-        time.sleep(1.2)
+        time.sleep(1.5)
     return None
 
 # ─── Streamlit UI ───────────────────────────────
@@ -234,6 +235,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
