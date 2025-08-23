@@ -21,7 +21,7 @@ STYLE_SUFFIX = (
     #"pencil sketch colored, visible strokes, high detailed, textured paper, "
     #"Ultra-realistic, photorealistic"
     #"pencil sketch, colored pencil style, high detailed,  "
-    "Ultra-realistic, photorealistic, cinematic lighting, volumetric light, dramatic contrast, "
+    #"Ultra-realistic, photorealistic, cinematic lighting, volumetric light, dramatic contrast, "
     "Ultra-realistic, photorealistic,chiaoscuro, dramatic contrast, "
     #"film still, epic composition, highly detailed, masterpiece, "
     "shallow depth-of-field, 35 mm lens, no text overlay, aspect_ratio=16:9, wide."
@@ -102,7 +102,7 @@ def gerar_imagem(client_img, prompt: str, tries: int = 20) -> bytes | None:
             resp = client_img.models.generate_content(
                 #model="gemini-2.0-flash-exp-image-generation",
                 #model="gemini-2.0-flash-preview-image-generation",
-                model="imagen-4.0-fast-generate-001",
+                model="imagen-3.0-generate-002",
                 contents=[prompt],
                 config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             )
@@ -236,6 +236,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
