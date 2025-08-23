@@ -101,7 +101,8 @@ def gerar_imagem(client_img, prompt: str, tries: int = 20) -> bytes | None:
         try:
             resp = client_img.models.generate_content(
                 #model="gemini-2.0-flash-exp-image-generation",
-                model="gemini-2.0-flash-preview-image-generation",
+                #model="gemini-2.0-flash-preview-image-generation",
+                model="imagen-4.0-fast-generate-001",
                 contents=[prompt],
                 config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"])
             )
@@ -235,6 +236,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
