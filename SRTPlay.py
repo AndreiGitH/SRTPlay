@@ -96,7 +96,7 @@ def gerar_prompt(client_txt, texto: str) -> str:
     return f"{texto}, {STYLE_SUFFIX}"
 
 
-def gerar_imagem(client_img, prompt: str, tries: int = 20) -> bytes | None:
+def gerar_imagem(client_img, prompt: str, tries: int = 2) -> bytes | None:
     for _ in range(tries):
         try:
             resp = client_img.models.generate_content(
@@ -235,6 +235,7 @@ if st.session_state["imgs"]:
     st.download_button(
         "⬇️ Baixar Prompts (.txt)", txt, "prompts.txt", "text/plain"
     )
+
 
 
 
